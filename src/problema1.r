@@ -12,8 +12,8 @@
 
 set.seed(87)
 
-lambda  <- 1000
-p       <- 0.01
+lambda  <- 1000 # PARAMETRIZABIL
+p       <- 0.01 # PARAMETRIZABIL
 #p      <- 0.05
 #p      <- 0.2
 nr_zile <- 365
@@ -53,7 +53,7 @@ hist(date$sus,
 
 # Pt a verifica extragem 10% din acel total per zi
 # sample?
-proc_verificare <- 10 / 100
+proc_verificare <- 10 / 100 #PARAMETRIZABIL
 
 #sample(date$total, size = as.integer(date$total * proc_verificare), 
 #       replace = FALSE,
@@ -80,4 +80,38 @@ date$nedetectate <- date$sus - date$detectate
 # dupa lambda, daca per zi sunt mai multe cereri decat baseline-ul
 # average de lambda = 1000, adaptam procentul dinamic
 
+#TO:DO e o linie
+
+# Cerinta 5. Pt. fiecare strategie se calculeaza
+# a)        - probabilitate empirica de a detecta cel putin o cerere sus/per zi
+# b)        - proportie medie de cereri suspecte detectate
+# c)        - proportie medie de cereri suspecte nedetectate
+# d)        - nr mediu de verificari efectuate zilnic
+# e)        - un indicator de eficienta, definit de NOI
+#               EIGRP metric??????????
+
+# strategia simpla
+
+# a)
+vector_logic <- date$detectate > 0
+prob_empiric <- sum(vector_logic) / length(vector_logic)
+# alternativ mean(date$detectate > 0)
+
+# b)
+# consideram proportia per total, maybe considerat si pt detectate/suspecte
+
+#mean(date$detectate / date$total)
+mean(date$detectate / date$sus)
+# in proportie detectezi din 10 suspicioase doar una.
+
+# c)
+mean(date$nedetectate / date$sus)
+
+# d)
+mean(date$verificate)
+
+# e)
+mean(date$detectate) / mean(date$verificate) * 100
+# metrica tris
+# Alright sprinters we'll put a pin on that!!!!!!
 
