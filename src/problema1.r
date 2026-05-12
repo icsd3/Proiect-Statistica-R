@@ -54,15 +54,26 @@ hist(date$sus,
 # Pt a verifica extragem 10% din acel total per zi
 # sample?
 proc_verificare <- 10 / 100 #PARAMETRIZABIL
-
+date$verificate <- floor(date$total * proc_verificare)
 #sample(date$total, size = as.integer(date$total * proc_verificare), 
 #       replace = FALSE,
 #       p = date$sus / date$total # nr caz fav / total
 #      )
 
-# hypergeom
+# VERIFICARE ADAPTIVA
+# dupa lambda, daca per zi sunt mai multe cereri decat baseline-ul
+# average de lambda = 1000, adaptam procentul dinamic
 
-date$verificate <- floor(date$total * proc_verificare)
+# Consideram ca pe langa un baseline de 20% de cereri verificate
+# mai adaugam procente dupa cat de mult depaseste sau scade sub valoarea medie
+# deja stiuta, adica lambda = 1000.
+proc_adapt <- 20 / 100 + (date$total - lambda)/lambda
+date$verificate <- floor(date$total * proc_adapt)
+
+# ===========RULAT INDIFERENT DE TIPUL DE VERIFICARE=============
+
+
+# hypergeom
 # Repartitia hypergeometrica are
 #ca parametrii N total, N1 de normale,
 #N2 cele sus, K cate verificam actually
@@ -76,11 +87,10 @@ date$detectate <- rhyper(
 
 date$nedetectate <- date$sus - date$detectate
 
-# VERIFICARE ADAPTIVA
-# dupa lambda, daca per zi sunt mai multe cereri decat baseline-ul
-# average de lambda = 1000, adaptam procentul dinamic
 
-#TO:DO e o linie
+
+
+
 
 # Cerinta 5. Pt. fiecare strategie se calculeaza
 # a)        - probabilitate empirica de a detecta cel putin o cerere sus/per zi
@@ -89,8 +99,6 @@ date$nedetectate <- date$sus - date$detectate
 # d)        - nr mediu de verificari efectuate zilnic
 # e)        - un indicator de eficienta, definit de NOI
 #               EIGRP metric??????????
-
-# strategia simpla
 
 # a)
 vector_logic <- date$detectate > 0
