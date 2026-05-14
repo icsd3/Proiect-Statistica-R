@@ -34,26 +34,19 @@ date <- data.frame(
   normale = total_cereri - cereri_sus,
   sus = cereri_sus
 )
-# histograma date suspecte per an cu frecventele lor
-hist(date$sus, 
-     col = "skyblue",
-     border = "black",
-     main = "Histograma date sus",
-     xlab = "Nr. sus",
-     ylab = "Frecventa",
-     breaks = 20
-     )
+
 
 # STRATEGII VERIFICARE
 
 # VERIFICARE SIMPLA
+
 # cereri per zi, 10%
 # ziua 1 100 (5 sus) -> 10
 # ziua 2 123 -> 23
 
 # Pt a verifica extragem 10% din acel total per zi
 # sample?
-proc_verificare <- 10 / 100 #PARAMETRIZABIL
+proc_verificare <- 20 / 100 #PARAMETRIZABIL
 date$verificate <- floor(date$total * proc_verificare)
 #sample(date$total, size = as.integer(date$total * proc_verificare), 
 #       replace = FALSE,
@@ -61,14 +54,24 @@ date$verificate <- floor(date$total * proc_verificare)
 #      )
 
 # VERIFICARE ADAPTIVA
+
 # dupa lambda, daca per zi sunt mai multe cereri decat baseline-ul
 # average de lambda = 1000, adaptam procentul dinamic
 
 # Consideram ca pe langa un baseline de 20% de cereri verificate
 # mai adaugam procente dupa cat de mult depaseste sau scade sub valoarea medie
 # deja stiuta, adica lambda = 1000.
-proc_adapt <- 20 / 100 + (date$total - lambda)/lambda
+# proc_adapt <- 20 / 100 + (date$total - lambda)/lambda
+# date$verificate <- floor(date$total * proc_adapt)
+proc_adapt <- 20 / 100 + abs(date$total - lambda) * 80/100
+date$verificate <- floor(date$total * proc_adapt / 100)
+
+
+#alta idee, varianta in numarator
+proc_adapt <- (20 +  abs(date$total - lambda) * 0.4) / 100
 date$verificate <- floor(date$total * proc_adapt)
+# TO:DO e ft shit strategia, tb sa o facem cumva sa fie mai agresiva pe spike-uri.
+
 
 # ===========RULAT INDIFERENT DE TIPUL DE VERIFICARE=============
 
@@ -123,3 +126,52 @@ mean(date$detectate) / mean(date$verificate) * 100
 # metrica tris
 # Alright sprinters we'll put a pin on that!!!!!!
 
+
+# Cerinta 6. Vizualizari
+# a)        - histograma nr de cereri sus per zi (frecventa cereri sus)
+hist(date$sus, 
+     col = "skyblue",
+     border = "black",
+     main = "Histograma date sus",
+     xlab = "Nr. sus",
+     ylab = "Frecventa",
+     breaks = 10
+     )
+
+# b)        - histograma nr de cereri sus detectate per zi
+
+hist(date$detectate, 
+     col = "salmon",
+     border = "black",
+     main = "Histograma cereri sus detectate per zi",
+     xlab = "Nr. cereri sus detectate",
+     ylab = "Frecventa",
+     breaks = 10
+     )
+
+# c)        - Graf comparativ intre strategii de verificare
+
+# to do
+
+
+# d)        - Evolutia zilnica a nr de cereri sus si cereri detectate
+
+#plot zile / nr de cereri
+plot(date$zi, date$sus, type = "l", col = "red", lwd = 2,
+     main = "Evolutia zilnica a cererilor sus si detectate",
+     xlab = "Ziua",
+     ylab = "Nr. cereri",
+     ylim = c(0, max(date$sus))
+     )
+lines(date$zi, date$detectate, col = "blue", lwd = 2)
+legend("topright", legend = c("Cereri Sus", "Cereri Detectate"), col = c("red", "blue"), lwd = 2)
+
+#plot evolutie cereri
+plot(date$zi, cumsum(date$sus), type = "l", col = "red", lwd = 2,
+     main = "Evolutia cumulativa a cererilor sus si detectate",
+     xlab = "Ziua",
+     ylab = "Nr. cereri",
+     ylim = c(0, max(cumsum(date$sus)))
+     )
+lines(date$zi, cumsum(date$detectate), col = "blue", lwd = 2)
+legend("topright", legend = c("Cereri Sus", "Cereri Detectate"), col = c("red", "blue"), lwd = 2)
