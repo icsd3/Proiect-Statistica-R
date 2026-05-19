@@ -1,0 +1,41 @@
+---
+title: "Problema 1"
+author: "Sirghe Matei,Popa Mircea,Bujor Stefan,Afton Ungureanu Robert"
+format: pdf
+editor: visual
+---
+
+# Documentatie Problema 1
+
+In aceasta documentatie vom explica cum am rezolvat cerintele si deciziile luate cand vine vorba de rezolvarea acestora
+
+## Cerinta obligatorie
+
+### Partea 1
+
+Am decis sa folosim un dataframe pentru a stoca toate datele care arata astfel:
+
+```{r}
+date <- data.frame(
+  zi             = integer(),
+  total          = integer(),
+  normale        = integer(),
+  sus            = integer(),
+  verificate_s   = integer(),
+  verificate_a   = integer(),
+  verificate_a2  = integer(),
+  detectate_s    = integer(),
+  nedetectate_s  = integer(),
+  detectate_a    = integer(),
+  nedetectate_a  = integer(),
+  detectate_a2   = integer(),
+  nedetectate_a2 = integer()
+)
+
+str(date)
+
+```
+
+### Partea 2
+
+Putem considera ca numarul total de accesuri per zi urmaresc repartitia Poisson, deoarece modelul nostru matematic se bazeaza pe evenimente ce se intampla intr-un interval fix. Puteam alege si alte repartii deoarece nu avem detalii despre cereri

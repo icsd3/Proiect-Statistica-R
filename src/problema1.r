@@ -47,7 +47,7 @@ date <- data.frame(
 # Pt a verifica extragem 10% din acel total per zi
 # sample?
 proc_verificare <- 10 / 100 #PARAMETRIZABIL
-date$verificate <- floor(date$total * proc_verificare)
+date$verificate_s <- floor(date$total * proc_verificare)
 #sample(date$total, size = as.integer(date$total * proc_verificare), 
 #       replace = FALSE,
 #       p = date$sus / date$total # nr caz fav / total
@@ -64,12 +64,12 @@ date$verificate <- floor(date$total * proc_verificare)
 # proc_adapt <- 20 / 100 + (date$total - lambda)/lambda
 # date$verificate <- floor(date$total * proc_adapt)
 proc_adapt <- 20 / 100 + abs(date$total - lambda) * 80/100
-date$verificate <- floor(date$total * proc_adapt / 100)
+date$verificate_a <- floor(date$total * proc_adapt / 100)
 
 
 #alta idee, varianta in numarator
-proc_adapt <- (20 +  abs(date$total - lambda) * 0.4) / 100
-date$verificate <- floor(date$total * proc_adapt)
+proc_adapt2 <- (20 +  abs(date$total - lambda) * 0.4) / 100
+date$verificate_a2 <- floor(date$total * proc_adapt2)
 # TO:DO e ft shit strategia, tb sa o facem cumva sa fie mai agresiva pe spike-uri.
 
 
@@ -81,19 +81,29 @@ date$verificate <- floor(date$total * proc_adapt)
 #ca parametrii N total, N1 de normale,
 #N2 cele sus, K cate verificam actually
 
-date$detectate <- rhyper(
+date$detectate_s <- rhyper(
   nn <- nr_zile,
   m = date$sus, # N2
   n = date$normale, #N1
-  k = date$verificate # actual nr verificate
+  k = date$verificate_s # actual nr verificate
 )
+date$nedetectate_s <- date$sus - date$detectate_s
 
-date$nedetectate <- date$sus - date$detectate
+date$detectate_a <- rhyper(
+  nn <- nr_zile,
+  m = date$sus, # N2
+  n = date$normale, #N1
+  k = date$verificate_a # actual nr verificate
+)
+date$nedetectate_a <- date$sus - date$detectate_a
 
-
-
-
-
+date$detectate_a2 <- rhyper(
+  nn <- nr_zile,
+  m = date$sus, # N2
+  n = date$normale, #N1
+  k = date$verificate_a2 # actual nr verificate
+)
+date$nedetectate_a2 <- date$sus - date$detectate_a2
 
 # Cerinta 5. Pt. fiecare strategie se calculeaza
 # a)        - probabilitate empirica de a detecta cel putin o cerere sus/per zi
@@ -104,7 +114,7 @@ date$nedetectate <- date$sus - date$detectate
 #               EIGRP metric??????????
 
 # a)
-vector_logic <- date$detectate > 0
+vector_logic <- date$detectate_s > 0
 prob_empiric <- sum(vector_logic) / length(vector_logic)
 # alternativ mean(date$detectate > 0)
 
@@ -112,17 +122,17 @@ prob_empiric <- sum(vector_logic) / length(vector_logic)
 # consideram proportia per total, maybe considerat si pt detectate/suspecte
 
 #mean(date$detectate / date$total)
-mean(date$detectate / date$sus)
+mean(date$detectate_s / date$sus)
 # in proportie detectezi din 10 suspicioase doar una.
 
 # c)
-mean(date$nedetectate / date$sus)
+mean(date$nedetectate_s / date$sus)
 
 # d)
-mean(date$verificate)
+mean(date$verificate_s)
 
 # e)
-mean(date$detectate) / mean(date$verificate) * 100
+mean(date$detectate_s) / mean(date$verificate_s) * 100
 # metrica tris
 # Alright sprinters we'll put a pin on that!!!!!!
 
