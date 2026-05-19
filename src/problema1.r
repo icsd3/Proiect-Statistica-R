@@ -46,7 +46,7 @@ date <- data.frame(
 
 # Pt a verifica extragem 10% din acel total per zi
 # sample?
-proc_verificare <- 20 / 100 #PARAMETRIZABIL
+proc_verificare <- 10 / 100 #PARAMETRIZABIL
 date$verificate <- floor(date$total * proc_verificare)
 #sample(date$total, size = as.integer(date$total * proc_verificare), 
 #       replace = FALSE,
@@ -175,3 +175,51 @@ plot(date$zi, cumsum(date$sus), type = "l", col = "red", lwd = 2,
      )
 lines(date$zi, cumsum(date$detectate), col = "blue", lwd = 2)
 legend("topright", legend = c("Cereri Sus", "Cereri Detectate"), col = c("red", "blue"), lwd = 2)
+
+# Cerinta 7. Simulare!
+
+val_sim <- vector("list", nr_zile)
+
+for(i in 1:nr_zile) {
+  val_sim[[i]] <- numeric(date$normale[i])
+  vector_curent <- val_sim[[i]]
+  indici_aleatori <- sample(1:date$normale[i], date$sus[i])
+  vector_curent[indici_aleatori] <- 1
+  val_sim[[i]] <- vector_curent
+}
+
+Calculare_Procent <- function(procent) {
+  procent <- procent/100
+  prob <- vector("numeric", nr_zile)
+  for(i in 1:nr_zile){
+    max_range <- date$normale[i]
+    num_indexes <- round(date$normale[i]*procent, 1)
+    distinct_indexes <- sample(1:max_range, num_indexes)
+    prob[i] <- sum(val_sim[[i]][distinct_indexes])/date$sus[i]*100
+  }
+  return(mean(prob))
+}
+
+Repetare_Detect_Sus <- function(numar){
+  Medie_y <- c(0,0,0,0,0)
+  for(i in 1:numar){
+    Medie_y <- Medie_y + c(Calculare_Procent(1), Calculare_Procent(5), Calculare_Procent(10), Calculare_Procent(20), Calculare_Procent(30))
+  }
+  Medie_y <- Medie_y / numar
+  return(Medie_y)
+}
+
+x <- c(1,5,10,20,30)
+y <- c(Calculare_Procent(1), Calculare_Procent(5), Calculare_Procent(10), Calculare_Procent(20), Calculare_Procent(30))
+
+plot(x, y, type = "b", col = "blue", pch = 16, lwd = 2,
+  main = "Procent sus detectate din sus total (media la toate zilele)",
+  xlab = "Procent Verificate", 
+  ylab = "Procent Sus Detectate"
+)
+y_1000 <- Repetare_Detect_Sus(100)
+
+# Se observa cum prin incercare aleatorie procentul de cereri suspicioase detectate creste linear cu
+# procentul de date verificate dintre cele totale DECI PROBABILITATEA DE DETECTIE SE MODIFICA LINEAR
+
+
