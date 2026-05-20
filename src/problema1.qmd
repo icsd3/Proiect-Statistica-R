@@ -1,8 +1,22 @@
 ---
-title: "Problema 1"
-author: "Sirghe Matei,Popa Mircea,Bujor Stefan,Afton Ungureanu Robert"
+title: "Studiu prin simulare în R"
+author: 
+  - "Sîrghe Matei-Ștefan"
+  - "Popa Mircea"
+  - "Bujor Ștefan"
+  - "Afton Ungureanu Robert"
+date: last-modified
+date-format: "DD MMMM YYYY"
 format: pdf
+documentclass: report
+toc-title: "Cuprins"
+toc: true
 editor: visual
+pdf-engine: xelatex
+latex-auto-install: false
+pdf-engine-opts:
+  - '--no-shell-escape'
+  - '--halt-on-error'
 ---
 
 # Documentatie Problema 1
@@ -11,12 +25,13 @@ In aceasta documentatie vom explica cum am rezolvat cerintele si deciziile luate
 
 ## Cerinta obligatorie
 
-### Partea 1
+### Cerinta 1
 
 Am decis sa folosim un dataframe pentru a stoca toate datele care arata astfel:
 
 ```{r}
-date <- data.frame(
+#| eval: false
+data <- data.frame(
   zi             = integer(),
   total          = integer(),
   normale        = integer(),
@@ -32,10 +47,252 @@ date <- data.frame(
   nedetectate_a2 = integer()
 )
 
-str(date)
+```
+
+### Cerinta 2
+
+Putem considera ca numarul total de accesuri per zi urmaresc repartitia Poisson, deoarece modelul nostru matematic se bazeaza pe evenimente ce se intampla intr-un interval fix. Puteam alege si alte repartii deoarece nu avem detalii despre cereri, cat timp ne asiguram ca acestea sunt marginite.
+
+Am ales lambda un numar care sa fie mai mare astfel incat simularile sa fie mai apropiate de adevar. Daca foloseam un numar mic cum ar fi 2, anumite simulari si calcule de mai tarziu nu ar putea sa fie calculate corect.
+
+Numarul de zile ales este aleator, dar din nou dorim un numar mai mare pentru a avea mai multe date deci vom alege un an.
+
+```{r}
+#| eval: false
+lambda  <- 1000
+nr_zile <- 365
+
+total <- rpois(nr_zile, lambda)
 
 ```
 
-### Partea 2
+### Cerinta 3
 
-Putem considera ca numarul total de accesuri per zi urmaresc repartitia Poisson, deoarece modelul nostru matematic se bazeaza pe evenimente ce se intampla intr-un interval fix. Puteam alege si alte repartii deoarece nu avem detalii despre cereri
+Vom avea 3 probabilitati definite
+
+```{r}
+#| eval: false
+p       <- 0.01
+p2      <- 0.05
+p3      <- 0.2
+
+```
+
+### Cerinta 4
+
+#### a) Verificare aleatoare simpla
+
+Pentru verificarea toate cele trei verificari, am ales sa folosim repartizarea hypergeometrica deoarece definitia ei se portriveste pentru situatia noastra unde avem n cereri verificate din N cereri totale, stiind ca k dintre acestea sunt suspecte.
+
+```{r}
+#| eval: false
+proc_verificare <- 10 / 100 #PARAMETRIZABIL
+date$verificate_s <- floor(date$total * proc_verificare)
+date$detectate_s <- rhyper(
+  nn <- nr_zile,
+  m = date$sus, # N2
+  n = date$normale, #N1
+  k = date$verificate_s # actual nr verificate
+)
+date$nedetectate_s <- date$sus - date$detectate_s
+
+```
+
+#### b) Verificare adaptiva
+
+Crestem procentul odata ce vedem ca numarul de cereri din acea zi este mai mare decat media lambda
+
+```{r}
+#| eval: false
+proc_adapt <- 20 / 100 + abs(date$total - lambda) * 80/100
+date$verificate_a <- floor(date$total * proc_adapt / 100)
+
+date$detectate_a <- rhyper(
+  nn <- nr_zile,
+  m = date$sus, # N2
+  n = date$normale, #N1
+  k = date$verificate_a # actual nr verificate
+)
+date$nedetectate_a <- date$sus - date$detectate_a
+
+```
+
+#### c) Verificare propusa
+
+Procedam ca la punctul b doar ca de aceasta data, incercam ceva si mai agresiv care sa identifice mai multe cereri suspecte.
+
+```{r}
+#| eval: false
+proc_adapt2 <- (20 +  abs(date$total - lambda) * 0.4) / 100
+date$verificate_a2 <- floor(date$total * proc_adapt2)
+
+date$detectate_a2 <- rhyper(
+  nn <- nr_zile,
+  m = date$sus, # N2
+  n = date$normale, #N1
+  k = date$verificate_a2 # actual nr verificate
+)
+date$nedetectate_a2 <- date$sus - date$detectate_a2
+
+```
+
+### Cerinta 5
+
+-   Probabilitatea empirică de a detecta cel puțin o cerere suspectă într-o zi
+
+```{r}
+#| eval: false
+vector_logic <- date$detectate_s > 0
+prob_empiric <- sum(vector_logic) / length(vector_logic)
+```
+
+-   Proporția medie de cereri suspecte detectate
+
+```{r}
+#| eval: false
+mean(date$detectate_s / date$sus)
+```
+
+- Proporția medie de cereri suspecte nedetectate
+
+```{r}
+#| eval: false
+mean(date$nedetectate_s / date$sus)
+```
+- Numărul mediu de verificări efectuate zilnic
+
+```{r}
+#| eval: false
+mean(date$verificate_s)
+```
+
+- Un indicator de eficiență, ales și definit de echipă
+
+Aici am ales ca indicator de eficienta media de cereri suspecte detectate dintre cele verificate.
+
+```{r}
+#| eval: false
+mean(date$detectate_s) / mean(date$verificate_s) * 100
+```
+
+### Cerinta 6
+
+- Histograma numărului de cereri suspecte pe zi
+
+```{r}
+#| eval: false
+hist(date$sus, 
+     col = "skyblue",
+     border = "black",
+     main = "Histograma date sus",
+     xlab = "Nr. sus",
+     ylab = "Frecventa",
+     breaks = 10
+     )
+
+```
+
+- Histograma numărului de cereri suspecte detectate
+
+```{r}
+#| eval: false
+hist(date$detectate, 
+     col = "salmon",
+     border = "black",
+     main = "Histograma cereri sus detectate per zi",
+     xlab = "Nr. cereri sus detectate",
+     ylab = "Frecventa",
+     breaks = 10
+     )
+
+```
+
+- Grafic comparativ între strategiile de verificare
+
+```{r}
+#| eval: false
+#NU AM FACUT INCA
+
+```
+
+- Evoluția zilnică a cererilor suspecte și a celor detectate
+
+Am facut un plot pentru zile impartit la numarul decereri:
+
+```{r}
+#| eval: false
+plot(date$zi, date$sus, type = "l", col = "red", lwd = 2,
+     main = "Evolutia zilnica a cererilor sus si detectate",
+     xlab = "Ziua",
+     ylab = "Nr. cereri",
+     ylim = c(0, max(date$sus))
+     )
+lines(date$zi, date$detectate, col = "blue", lwd = 2)
+legend("topright", legend = c("Cereri Sus", "Cereri Detectate"), col = c("red", "blue"), lwd = 2)
+
+```
+
+Plot evolutie numar total de cereri
+
+```{r}
+#| eval: false
+plot(date$zi, cumsum(date$sus), type = "l", col = "red", lwd = 2,
+     main = "Evolutia cumulativa a cererilor sus si detectate",
+     xlab = "Ziua",
+     ylab = "Nr. cereri",
+     ylim = c(0, max(cumsum(date$sus)))
+     )
+lines(date$zi, cumsum(date$detectate), col = "blue", lwd = 2)
+legend("topright", legend = c("Cereri Sus", "Cereri Detectate"), col = c("red", "blue"), lwd = 2)
+
+```
+
+###Cerinta 7
+
+```{r}
+#| eval: false
+val_sim <- vector("list", nr_zile)
+
+for(i in 1:nr_zile) {
+  val_sim[[i]] <- numeric(date$normale[i])
+  vector_curent <- val_sim[[i]]
+  indici_aleatori <- sample(1:date$normale[i], date$sus[i])
+  vector_curent[indici_aleatori] <- 1
+  val_sim[[i]] <- vector_curent
+}
+
+Calculare_Procent <- function(procent) {
+  procent <- procent/100
+  prob <- vector("numeric", nr_zile)
+  for(i in 1:nr_zile){
+    max_range <- date$normale[i]
+    num_indexes <- round(date$normale[i]*procent, 1)
+    distinct_indexes <- sample(1:max_range, num_indexes)
+    prob[i] <- sum(val_sim[[i]][distinct_indexes])/date$sus[i]*100
+  }
+  return(mean(prob))
+}
+
+Repetare_Detect_Sus <- function(numar){
+  Medie_y <- c(0,0,0,0,0)
+  for(i in 1:numar){
+    Medie_y <- Medie_y + c(Calculare_Procent(1), Calculare_Procent(5), Calculare_Procent(10), Calculare_Procent(20), Calculare_Procent(30))
+  }
+  Medie_y <- Medie_y / numar
+  return(Medie_y)
+}
+
+x <- c(1,5,10,20,30)
+y <- c(Calculare_Procent(1), Calculare_Procent(5), Calculare_Procent(10), Calculare_Procent(20), Calculare_Procent(30))
+
+plot(x, y, type = "b", col = "blue", pch = 16, lwd = 2,
+  main = "Procent sus detectate din sus total (media la toate zilele)",
+  xlab = "Procent Verificate", 
+  ylab = "Procent Sus Detectate"
+)
+y_1000 <- Repetare_Detect_Sus(100)
+
+
+```
+
+Se observa cum prin incercare aleatorie procentul de cereri suspicioase detectate creste linear cu procentul de date verificate dintre cele totale, deci probabilitatea de detectie se schimba linear.

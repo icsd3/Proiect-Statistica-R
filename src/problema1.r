@@ -51,7 +51,7 @@ date$verificate_s <- floor(date$total * proc_verificare)
 #sample(date$total, size = as.integer(date$total * proc_verificare), 
 #       replace = FALSE,
 #       p = date$sus / date$total # nr caz fav / total
-#      )
+#\      )
 
 # VERIFICARE ADAPTIVA
 
