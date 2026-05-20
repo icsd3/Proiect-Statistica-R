@@ -150,7 +150,7 @@ hist(date$sus,
 
 # b)        - histograma nr de cereri sus detectate per zi
 
-hist(date$detectate, 
+hist(date$detectate_s, 
      col = "salmon",
      border = "black",
      main = "Histograma cereri sus detectate per zi",
@@ -161,8 +161,16 @@ hist(date$detectate,
 
 # c)        - Graf comparativ intre strategii de verificare
 
-# to do
-
+plot(date$zi, cumsum(date$sus), type = "l", col = "red", lwd = 2,
+     main = "Evolutia cumulativa a cererilor sus si detectate",
+     xlab = "Ziua",
+     ylab = "Nr. cereri",
+     ylim = c(0, max(cumsum(date$sus)))
+)
+lines(date$zi, cumsum(date$detectate_s), col = "lightblue", lwd = 2)
+lines(date$zi, cumsum(date$detectate_a), col = "blue", lwd = 2)
+lines(date$zi, cumsum(date$detectate_a2), col = "darkblue", lwd = 2)
+legend("topright", legend = c("Cereri Suspecte", "Cereri Detectate Simplu","Cereri Detectate Adaptiv","Cereri Detectate Adaptiv propus"), col = c("red", "lightblue","blue","darkblue"), lwd = 2)
 
 # d)        - Evolutia zilnica a nr de cereri sus si cereri detectate
 
@@ -173,7 +181,7 @@ plot(date$zi, date$sus, type = "l", col = "red", lwd = 2,
      ylab = "Nr. cereri",
      ylim = c(0, max(date$sus))
      )
-lines(date$zi, date$detectate, col = "blue", lwd = 2)
+lines(date$zi, date$detectate_a, col = "blue", lwd = 2)
 legend("topright", legend = c("Cereri Sus", "Cereri Detectate"), col = c("red", "blue"), lwd = 2)
 
 #plot evolutie cereri
@@ -183,7 +191,7 @@ plot(date$zi, cumsum(date$sus), type = "l", col = "red", lwd = 2,
      ylab = "Nr. cereri",
      ylim = c(0, max(cumsum(date$sus)))
      )
-lines(date$zi, cumsum(date$detectate), col = "blue", lwd = 2)
+lines(date$zi, cumsum(date$detectate_a), col = "blue", lwd = 2)
 legend("topright", legend = c("Cereri Sus", "Cereri Detectate"), col = c("red", "blue"), lwd = 2)
 
 # Cerinta 7. Simulare!
@@ -227,7 +235,13 @@ plot(x, y, type = "b", col = "blue", pch = 16, lwd = 2,
   xlab = "Procent Verificate", 
   ylab = "Procent Sus Detectate"
 )
+
 y_1000 <- Repetare_Detect_Sus(100)
+plot(x, y_1000, type = "b", col = "darkblue", pch = 16, lwd = 2,
+     main = "Procent sus detectate din sus total (media la toate zilele)",
+     xlab = "Procent Verificate", 
+     ylab = "Procent Sus Detectate"
+)
 
 # Se observa cum prin incercare aleatorie procentul de cereri suspicioase detectate creste linear cu
 # procentul de date verificate dintre cele totale DECI PROBABILITATEA DE DETECTIE SE MODIFICA LINEAR
