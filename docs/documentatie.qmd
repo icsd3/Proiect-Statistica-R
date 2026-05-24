@@ -307,7 +307,7 @@ date <- data.frame(
 
 Putem considera ca numarul total de accesuri per zi urmaresc repartitia Poisson, deoarece modelul nostru matematic se bazeaza pe evenimente ce se intampla intr-un interval fix. Puteam alege si alte repartii deoarece nu avem detalii despre cereri, cat timp ne asiguram ca acestea sunt marginite.
 
-Am ales lambda un numar care sa fie mai mare astfel incat simularile sa fie mai apropiate de adevar. Daca foloseam un numar mic cum ar fi 2, anumite simulari si calcule de mai tarziu nu ar fi facute cu acuratete mare.
+Am ales lambda un numar care sa fie mai mare astfel incat simularile sa fie mai apropiate de o situație mai realistică (i.e. 1000 de accesări în mediu per zi al resursei online).
 
 Numarul de zile ales este aleator, dar din nou dorim un numar mai mare pentru a avea mai multe date deci vom alege un an.
 
@@ -336,7 +336,7 @@ p3      <- 0.2
 
 #### a) Verificare aleatoare simpla
 
-Pentru verificarea toate cele trei verificari, am ales sa folosim repartizarea hypergeometrica deoarece definitia ei se portriveste pentru situatia noastra unde avem n cereri verificate din N cereri totale, stiind ca k dintre acestea sunt suspecte.
+Pentru testarea și aplicarea celor trei metode de verificare, am ales sa folosim repartizarea hypergeometrica deoarece definitia ei se portriveste pentru situatia noastra unde avem n cereri verificate din N cereri totale, stiind ca k dintre acestea sunt suspecte.
 
 ```{r}
 proc_verificare <- 10 / 100 #PARAMETRIZABIL
@@ -398,7 +398,7 @@ head(date$nedetectate_a2)
 
 ### Cerinta 5
 
--   Probabilitatea empirică de a detecta cel puțin o cerere suspectă într-o zi
+- Probabilitatea empirică de a detecta cel puțin o cerere suspectă într-o zi
 
 ```{r}
 
@@ -407,28 +407,28 @@ prob_empiric <- sum(vector_logic) / length(vector_logic)
 prob_empiric
 ```
 
--   Proporția medie de cereri suspecte detectate
+- Proporția medie de cereri suspecte detectate
 
 ```{r}
 
 mean(date$detectate_s / date$sus)
 ```
 
--   Proporția medie de cereri suspecte nedetectate
+- Proporția medie de cereri suspecte nedetectate
 
 ```{r}
 
 mean(date$nedetectate_s / date$sus)
 ```
 
--   Numărul mediu de verificări efectuate zilnic
+- Numărul mediu de verificări efectuate zilnic
 
 ```{r}
 
 mean(date$verificate_s)
 ```
 
--   Un indicator de eficiență, ales și definit de echipă
+- Un indicator de eficiență, ales și definit de echipă
 
 Aici am ales ca indicator de eficienta media de cereri suspecte detectate dintre cele verificate.
 
@@ -439,7 +439,7 @@ mean(date$detectate_s) / mean(date$verificate_s) * 100
 
 ### Cerinta 6
 
--   Histograma numărului de cereri suspecte pe zi
+- Histograma numărului de cereri suspecte pe zi
 
 ```{r}
 #| echo: true
@@ -455,7 +455,7 @@ hist(date$sus,
 
 ```
 
--   Histograma numărului de cereri suspecte detectate
+- Histograma numărului de cereri suspecte detectate
 
 ```{r}
 #| echo: true
@@ -471,7 +471,7 @@ hist(date$detectate_s,
 
 ```
 
--   Grafic comparativ între strategiile de verificare
+- Grafic comparativ între strategiile de verificare
 
 ```{r}
 #| echo: true
@@ -497,7 +497,7 @@ legend("topright",
 
 ```
 
--   Evoluția zilnică a cererilor suspecte și a celor detectate
+- Evoluția zilnică a cererilor suspecte și a celor detectate
 
 Am facut un plot pentru zile impartit la numarul decereri:
 

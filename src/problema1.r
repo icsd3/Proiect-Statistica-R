@@ -72,6 +72,45 @@ proc_adapt2 <- (20 +  abs(date$total - lambda) * 0.4) / 100
 date$verificate_a2 <- floor(date$total * proc_adapt2)
 # TO:DO e ft shit strategia, tb sa o facem cumva sa fie mai agresiva pe spike-uri.
 
+# ===========ADDENDUM========================
+# VERIFICARE ADAPTIVA 2.1
+# Voi incerca o strategie de tip Simple Moving Average
+# https://en.wikipedia.org/wiki/Moving_average
+# Basically, decat sa ne raportam la avg lambda, voi considera urmatorul scenariu
+# La momentul t actual, ne uitam la average-ul de acum 7 zile (t - 7) si adaptam average-ul
+
+window_size <- 7
+check_fraction <- 0.2
+baseline_verificari <- 100 #sa zicem ca e un minim regardless
+# lambda = 1000
+check_quota <- numeric(nr_zile)
+quota_verificare <- numeric(nr_zile)
+verificari_actuale <- numeric(nr_zile)
+suspecte_detectate <- numeric(nr_zile)
+
+for(i in 1:nr_zile) {
+     #Calcul SMA
+     if(i <= window_size) {
+          sma_weighs <- lambda #nu avem destul de mult istoric inca!
+     } else {
+          sma_weighs <- mean(date$total[(i - window_size):(i - 1)])
+     }
+     # Determinare quota zilnic
+     quota_verificare[i] <- round(sma_weighs * check_fraction + baseline_verificari)
+
+     # Verificare
+
+     verificari_actuale[i] <- min(quota_verificare[i], date$total[i]) #also min pt safety ca sa nu iasa date peste
+
+     suspecte_detectate[i] <- rhyper(
+          nn = 1,
+          m = date$sus[i],
+          n = date$normale[i],
+          k = verificari_actuale[i]
+     )
+}
+# E DOG SHIT
+
 
 # ===========RULAT INDIFERENT DE TIPUL DE VERIFICARE=============
 
