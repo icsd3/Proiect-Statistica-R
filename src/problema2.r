@@ -59,10 +59,10 @@ ui <- fluidPage(
                tableOutput("stats_y")
         )
       ),
-      h4("Interpretare automata simplă:"),
-
-
-      
+      column(6,
+             h3("Interpretare automată:"),
+             tableOutput("automatic_stats")
+      )
     )
   )
 )
@@ -203,6 +203,7 @@ server <- function(input, output, session) {
   }
  # Functie ajutatoare pentru calculul coeficientului de asimetrie a lui Pearson
  # https://www.statisticshowto.com/probability-and-statistics/statistics-definitions/pearsons-coefficient-of-skewness/
+  
   calc_skewness <- function(vec) {
     v <- vec[is.finite(vec)]
     sk <- 3 * (mean(v) - median(v)) / sd(v)
@@ -214,45 +215,69 @@ server <- function(input, output, session) {
   #cerinta 7
   if_skewness <- function(sk) {
     if(sk > 0.2) {
-      return("Distribuția este asimetrică pozitiv (coada spre dreapta).")
+      return("asimetrică pozitiv")
     } else if(sk < -0.2) {
-      return("Distribuția este asimetrică negativ (coada spre stânga).")
+      return("asimetrică negativ")
     } else {
-      return("Distribuția este aproximativ simetrică.")
+      return("aproximativ simetrică")
     }
   }
 
   if_valori_comprimate <- function(max_X, max_Y) {
     if(max_Y < max_X) {
-        return("Transformarea a comprimat valorile mari")
+        return("comprimare")
     } else {
-        return("Transformarea a extins valorile mari")
+        return("extindere")
     }
   }
 
   if_strict_pos <- function(vec) {
     if(all(vec > 0)) {
-      return("Transformarea a produs valori strict pozitive.")
+      return("valori strict pozitive")
     } else {
-      return("Transformarea a produs valori. :)")
+      return("valori :)")
     }
   }
 
-  if_accent_extreme <- function(vec) {
-    v <- vec[is.finite(vec)]
-    iqr <- quantile(v, 3/4) - quantile(v, 1/4)
-    if(any(v > quantile(v, 3/4) + 1.5 * iqr) || any(v < quantile(v, 1/4) - 1.5 * iqr)) {
-      return("Transformarea a accentuat valorile extreme (outliers).")
+  if_accent_extreme <- function(x,y) {
+    iqrx <- quantile(x, 3/4) - quantile(x, 1/4)
+    iqry <- quantile(y, 3/4) - quantile(y, 1/4)
+    if(sum(x > quantile(x, 3/4) + 1.5 * iqrx | x < quantile(x, 1/4) - 1.5 * iqrx) <
+       sum(y > quantile(y, 3/4) + 1.5 * iqry | y < quantile(y, 1/4) - 1.5 * iqry)) {
+      return("accentuare")
     } else {
-      return("Transformarea nu a accentuat valorile extreme.")
+      return("diminuare")
     }
   }
 
-
+  calc_auto <- function(vecx,vecy){
+    x <- vecx[is.finite(vecx)]
+    y <- vecy[is.finite(vecy)]
+    
+    skx <- calc_skewness(x)
+    sky <- calc_skewness(y)
+    data.frame(
+      Indicator = c("Distribuția X",
+                    "Distribuția Y",
+                    "Transformarea a modificat simetria",
+                    "Transformarea a influentat valorile mari prin",
+                    "Transformarea a produs",
+                    "Transformarea a influentat valorile extreme prin"),
+      Valoare = c(if_skewness(skx),
+                  if_skewness(sky),
+                  !if_skewness(sky)==if_skewness(skx),
+                  if_valori_comprimate(max(x),max(y)),
+                  if_strict_pos(y),
+                  if_accent_extreme(x,y)
+                  )
+      )
+  }
+  
   
   # Afișare Tabele
   output$stats_x <- renderTable({ calc_stats(sim_data()$x) }, digits = 4, striped = TRUE, hover = TRUE, width = "100%")
   output$stats_y <- renderTable({ calc_stats(sim_data()$y) }, digits = 4, striped = TRUE, hover = TRUE, width = "100%")
+  output$automatic_stats <- renderTable({calc_auto(sim_data()$x,sim_data()$y)},digits = 4,striped = TRUE, hover = TRUE,width = "100%")
 }
 
 # Rulează aplicația
