@@ -1,8 +1,11 @@
 library(shiny)
 library(ggplot2)
+library(shinythemes)
 
 # --- INTERFAȚA UTILIZATOR (UI) ---
 ui <- fluidPage(
+#   theme = shinytheme("lumen"), disgusting white theme ew 
+  theme = shinytheme("darkly"),
   titlePanel("Transformări de Variabile Aleatoare Continue"),
   
   sidebarLayout(
@@ -70,10 +73,17 @@ server <- function(input, output, session) {
              numericInput("mu", "Medie (\u03bc):", value = 0),
              numericInput("sigma", "Deviație Standard (\u03c3 > 0):", value = 1, min = 0.0001)
            ),
-           "unif" = tagList(
-             numericInput("min", "Minim (a):", value = -2),
-             numericInput("max", "Maxim (b > a):", value = 2)
-           ),
+        #    "unif" = tagList(
+        #      numericInput("min", "Minim (a):", value = -2),
+        #      numericInput("max", "Maxim (b > a):", value = 2)
+        #    ),
+            "unif" = sliderInput(
+                "range_unif",
+                "Interval [a, b]:",
+                min = -100,
+                max = 100,
+                value = c(-2, 2)
+            ),
            "exp" = tagList(
              numericInput("rate", "Rată (\u03bb > 0):", value = 1, min = 0.0001)
            ),
@@ -109,10 +119,12 @@ server <- function(input, output, session) {
       theory_args <- list(mean = input$mu, sd = input$sigma)
       
     } else if (input$dist == "unif") {
-      validate(need(input$max > input$min, "Eroare: Maximul trebuie să fie strict mai mare decât minimul!"))
-      x <- runif(input$n, min = input$min, max = input$max)
+      validate(need(input$range_unif[2] > input$range_unif[1], "Eroare: Maximul trebuie să fie strict mai mare decât minimul!"))
+    #   x <- runif(input$n, min = input$min, max = input$max)
+        x <- runif(input$n, min = input$range_unif[1], max = input$range_unif[2])
       theory_fun <- dunif
-      theory_args <- list(min = input$min, max = input$max)
+    #   theory_args <- list(min = input$min, max = input$max)
+        theory_args <- list(min = input$range_unif[1], max = input$range_unif[2])
       
     } else if (input$dist == "exp") {
       validate(need(input$rate > 0, "Eroare: Rata trebuie să fie strict pozitivă!"))
