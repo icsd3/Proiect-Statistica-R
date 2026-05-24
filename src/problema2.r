@@ -58,7 +58,11 @@ ui <- fluidPage(
                h4("Indicatori Statistici pentru Y"),
                tableOutput("stats_y")
         )
-      )
+      ),
+      h4("Interpretare automata simplă:"),
+
+
+      
     )
   )
 )
@@ -197,6 +201,54 @@ server <- function(input, output, session) {
                   min(v), quantile(v, 0.25), median(v), quantile(v, 0.75), max(v))
     )
   }
+ # Functie ajutatoare pentru calculul coeficientului de asimetrie a lui Pearson
+ # https://www.statisticshowto.com/probability-and-statistics/statistics-definitions/pearsons-coefficient-of-skewness/
+  calc_skewness <- function(vec) {
+    v <- vec[is.finite(vec)]
+    sk <- 3 * (mean(v) - median(v)) / sd(v)
+    return(sk)
+  }
+
+  # IF-uri pentru interpretare automata simpla
+  #astea genereaza string-uri pe care le injectam in UI
+  #cerinta 7
+  if_skewness <- function(sk) {
+    if(sk > 0.2) {
+      return("Distribuția este asimetrică pozitiv (coada spre dreapta).")
+    } else if(sk < -0.2) {
+      return("Distribuția este asimetrică negativ (coada spre stânga).")
+    } else {
+      return("Distribuția este aproximativ simetrică.")
+    }
+  }
+
+  if_valori_comprimate <- function(max_X, max_Y) {
+    if(max_Y < max_X) {
+        return("Transformarea a comprimat valorile mari")
+    } else {
+        return("Transformarea a extins valorile mari")
+    }
+  }
+
+  if_strict_pos <- function(vec) {
+    if(all(vec > 0)) {
+      return("Transformarea a produs valori strict pozitive.")
+    } else {
+      return("Transformarea a produs valori. :)")
+    }
+  }
+
+  if_accent_extreme <- function(vec) {
+    v <- vec[is.finite(vec)]
+    iqr <- quantile(v, 3/4) - quantile(v, 1/4)
+    if(any(v > quantile(v, 3/4) + 1.5 * iqr) || any(v < quantile(v, 1/4) - 1.5 * iqr)) {
+      return("Transformarea a accentuat valorile extreme (outliers).")
+    } else {
+      return("Transformarea nu a accentuat valorile extreme.")
+    }
+  }
+
+
   
   # Afișare Tabele
   output$stats_x <- renderTable({ calc_stats(sim_data()$x) }, digits = 4, striped = TRUE, hover = TRUE, width = "100%")
