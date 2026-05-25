@@ -19,7 +19,7 @@ ui <- fluidPage(
                               "Exponențială" = "exp",
                               "Gamma" = "gamma")),
 
-      textOutput("dist_function"),
+      withMathJax(uiOutput("dist_function")),
       
       # UI Dinamic pentru parametrii repartiției alese
       uiOutput("dist_params"),
@@ -97,13 +97,14 @@ server <- function(input, output, session) {
            )
     )
   })
-  output$dist_function <- renderText({
-    switch(input$dist,
-           "norm" = paste("PDF Normală: f(x) =", "1/(σ√(2π)) * exp(-0.5 * ((x - μ)/σ)^2)"),
-           "unif" = paste("PDF Uniformă: f(x) =", "1/(b - a) pentru a ≤ x ≤ b, altfel 0"),
-           "exp" = paste("PDF Exponențială: f(x) =", "λ * exp(-λx) pentru x ≥ 0, altfel 0"),
-           "gamma" = paste("PDF Gamma: f(x) =", "(λ^α / Γ(α)) * x^(α-1) * exp(-λx) pentru x > 0, altfel 0")
+  output$dist_function <- renderUI({
+  formula <- switch(input$dist,
+    "norm"  = "$$f(x) = \\frac{1}{\\sigma\\sqrt{2\\pi}} \\exp\\!\\left(-\\frac{1}{2}\\left(\\frac{x-\\mu}{\\sigma}\\right)^{\\!2}\\right)$$",
+    "unif"  = "$$f(x) = \\begin{cases} \\dfrac{1}{b-a} & a \\le x \\le b \\\\ 0 & \\text{altfel} \\end{cases}$$",
+    "exp"   = "$$f(x) = \\begin{cases} \\lambda e^{-\\lambda x} & x \\ge 0 \\\\ 0 & \\text{altfel} \\end{cases}$$",
+    "gamma" = "$$f(x) = \\begin{cases} \\dfrac{\\lambda^\\alpha}{\\Gamma(\\alpha)}\\, x^{\\alpha-1} e^{-\\lambda x} & x > 0 \\\\ 0 & \\text{altfel} \\end{cases}$$"
     )
+    withMathJax(HTML(formula))
   })
   
   # Reactivitate: Generarea datelor declanșată de buton
