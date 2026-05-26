@@ -26,7 +26,7 @@ Pentru evaluare sunt calculate indicatori precum rata de detecție, numărul med
 
 Aplicația Shiny permite generarea de eșantioane pentru distribuții continue și aplicarea unor transformări asupra lor. Sunt acoperite două scenarii:
 
-- componentă unidimensională: generare pentru distribuții normală, uniformă, exponențială și gamma, urmată de transformări precum $x^2$, $|x|$, $\log(x)$, $e^x$ și $\sin(x)$
+- componentă unidimensională: generare pentru distribuții normală, uniformă, exponențială și gamma, urmată de transformări precum `x^2`, `|x|`, `log(x)`, `e^x` și `sin(x)`
 - componentă bidimensională: generare de perechi independente sau bivariate normale și transformări de tip sumă, diferență, produs și normă euclidiană
 
 Aplicația afișează histograme, statistici descriptive și grafice comparative pentru datele generate.
