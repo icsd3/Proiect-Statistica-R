@@ -120,20 +120,20 @@ ui <- fluidPage(
         tabPanel("Componenta bidimensionala",
           fluidRow(
             column(6,
-                   h4("Scatterplot Perechi (X, Y)"),
+                   h3("Scatterplot Perechi (X, Y)"),
                    plotOutput("plot_xy_2d"),
                    tableOutput("stats_xy_2d"),
                    br(),
-                   h4("Histograma X"),
+                   h3("Histograma X"),
                    plotOutput("plot_x_2d"),
                    tableOutput("stats_x_2d")
             ),
             column(6,
-                   h4("Histograma Transformării Z = h(X, Y)"),
+                   h3("Histograma Transformării Z = h(X, Y)"),
                    plotOutput("plot_z_2d"),
                    tableOutput("stats_z_2d"),
                    br(),
-                   h4("Histograma Y"),
+                   h3("Histograma Y"),
                    plotOutput("plot_y_2d"),
                    tableOutput("stats_y_2d")
             )
@@ -142,6 +142,47 @@ ui <- fluidPage(
       )
     )
   ),
+  
+  # Pseudo footer for credits
+  tags$div(
+    style = "text-align: center; margin-top: 20px; padding-top: 20px; border-top: 1px solid #444; margin-bottom: 20px;",
+    h5("Credite:", style = "margin-bottom: 15px;"),
+    fluidRow(
+      column(
+        width = 3,
+        img(
+          src = "mircea2.1.gif",
+          width = "100%",
+          style = "max-width: 220px; border-radius: 8px; display: block; margin: 0 auto;"
+        )
+      ),
+      column(
+        width = 3,
+        img(
+          src = "Sirghe2.png",
+          width = "100%",
+          style = "max-width: 220px; border-radius: 8px; display: block; margin: 0 auto;"
+        )
+      ),
+      column(
+        width = 3,
+        img(
+          src = "Bujor2.gif",
+          width = "100%",
+          style = "max-width: 220px; border-radius: 8px; display: block; margin: 0 auto;"
+        )
+      ),
+      column(
+        width = 3,
+        img(
+          src = "robert2.1.gif",
+          width = "100%",
+          style = "max-width: 220px; border-radius: 8px; display: block; margin: 0 auto;"
+        )
+      )
+    )
+  ),
+
   tags$head(
     tags$style(HTML("
     #stats_xy_2d table tbody tr:nth-child(n+3) {
@@ -234,37 +275,43 @@ server <- function(input, output, session) {
     theory_args <- list()
     
     if (input$dist == "norm") {
-      validate(need(input$sigma > 0, "Eroare: Deviația standard trebuie să fie strict pozitivă!"))
-      x <- rnorm(input$n, mean = input$mu, sd = input$sigma)
+      mu_val <- if (is.null(input$mu)) 0 else input$mu
+      sigma_val <- if (is.null(input$sigma)) 1 else input$sigma
+      validate(need(sigma_val > 0, "Eroare: Deviația standard trebuie să fie strict pozitivă!"))
+      x <- rnorm(input$n, mean = mu_val, sd = sigma_val)
       theory_fun <- dnorm
-      theory_args <- list(mean = input$mu, sd = input$sigma)
+      theory_args <- list(mean = mu_val, sd = sigma_val)
       
     } else if (input$dist == "unif") {
-      validate(need(input$range_unif[2] > input$range_unif[1], "Eroare: Maximul trebuie să fie strict mai mare decât minimul!"))
-    #   x <- runif(input$n, min = input$min, max = input$max)
-        x <- runif(input$n, min = input$range_unif[1], max = input$range_unif[2])
+      runif_val <- if (is.null(input$range_unif)) c(-2, 2) else input$range_unif
+      validate(need(runif_val[2] > runif_val[1], "Eroare: Maximul trebuie să fie strict mai mare decât minimul!"))
+      x <- runif(input$n, min = runif_val[1], max = runif_val[2])
       theory_fun <- dunif
-    #   theory_args <- list(min = input$min, max = input$max)
-        theory_args <- list(min = input$range_unif[1], max = input$range_unif[2])
+      theory_args <- list(min = runif_val[1], max = runif_val[2])
       
     } else if (input$dist == "exp") {
-      validate(need(input$rate > 0, "Eroare: Rata trebuie să fie strict pozitivă!"))
-      x <- rexp(input$n, rate = input$rate)
+      rate_val <- if (is.null(input$rate)) 1 else input$rate
+      validate(need(rate_val > 0, "Eroare: Rata trebuie să fie strict pozitivă!"))
+      x <- rexp(input$n, rate = rate_val)
       theory_fun <- dexp
-      theory_args <- list(rate = input$rate)
+      theory_args <- list(rate = rate_val)
       
     } else if (input$dist == "gamma") {
+      shape_val <- if (is.null(input$shape)) 2 else input$shape
+      rate_gamma_val <- if (is.null(input$rate_gamma)) 1 else input$rate_gamma
       validate(
-        need(input$shape > 0, "Eroare: Parametrul de formă trebuie să fie > 0!"),
-        need(input$rate_gamma > 0, "Eroare: Parametrul de rată trebuie să fie > 0!")
+        need(shape_val > 0, "Eroare: Parametrul de formă trebuie să fie > 0!"),
+        need(rate_gamma_val > 0, "Eroare: Parametrul de rată trebuie să fie > 0!")
       )
-      x <- rgamma(input$n, shape = input$shape, rate = input$rate_gamma)
+      x <- rgamma(input$n, shape = shape_val, rate = rate_gamma_val)
       theory_fun <- dgamma
-      theory_args <- list(shape = input$shape, rate = input$rate_gamma)
+      theory_args <- list(shape = shape_val, rate = rate_gamma_val)
     }
     
+    trans_val <- if (is.null(input$trans)) "x2" else input$trans
+    
     # APLICAREA TRANSFORMĂRII Y = g(X)
-    y <- switch(input$trans,
+    y <- switch(trans_val,
                 "x2"  = x^2,
                 "abs" = abs(x),
                 "log" = suppressWarnings(log(x)), # Va produce NaN pentru x <= 0
@@ -276,57 +323,71 @@ server <- function(input, output, session) {
   
   # --- GENERARE DATE PENTRU COMPONENTA BIDIMENSIONALA ---
   sim_data_2d <- eventReactive(input$sim_2d, {
-    req(input$n >= 10, input$mode_2d)
+    mode_2d_val <- if(is.null(input$mode_2d)) "indep" else input$mode_2d
+    req(input$n >= 10, mode_2d_val)
     
     n <- input$n
     x <- numeric(n)
     y <- numeric(n)
     
-    if (input$mode_2d == "indep") {
-      req(input$dist_x_2d, input$dist_y_2d)
+    if (mode_2d_val == "indep") {
+      dist_x <- if(is.null(input$dist_x_2d)) "norm" else input$dist_x_2d
+      dist_y <- if(is.null(input$dist_y_2d)) "norm" else input$dist_y_2d
+      
       # Geneare X
-      if (input$dist_x_2d == "norm") {
-        req(input$mu_x_indep, input$sigma_x_indep)
-        x <- rnorm(n, mean = input$mu_x_indep, sd = input$sigma_x_indep)
-      } else if (input$dist_x_2d == "unif") {
-        req(input$range_unif_x)
-        x <- runif(n, min = input$range_unif_x[1], max = input$range_unif_x[2])
-      } else if (input$dist_x_2d == "exp") {
-        req(input$rate_x_indep)
-        x <- rexp(n, rate = input$rate_x_indep)
-      } else if (input$dist_x_2d == "gamma") {
-        req(input$shape_x_indep, input$rate_gamma_x)
-        x <- rgamma(n, shape = input$shape_x_indep, rate = input$rate_gamma_x)
+      if (dist_x == "norm") {
+        mu_x <- if(is.null(input$mu_x_indep)) 0 else input$mu_x_indep
+        sigma_x <- if(is.null(input$sigma_x_indep)) 1 else input$sigma_x_indep
+        x <- rnorm(n, mean = mu_x, sd = sigma_x)
+      } else if (dist_x == "unif") {
+        range_x <- if(is.null(input$range_unif_x)) c(-2, 2) else input$range_unif_x
+        x <- runif(n, min = range_x[1], max = range_x[2])
+      } else if (dist_x == "exp") {
+        rate_x <- if(is.null(input$rate_x_indep)) 1 else input$rate_x_indep
+        x <- rexp(n, rate = rate_x)
+      } else if (dist_x == "gamma") {
+        shape_x <- if(is.null(input$shape_x_indep)) 2 else input$shape_x_indep
+        rate_g_x <- if(is.null(input$rate_gamma_x)) 1 else input$rate_gamma_x
+        x <- rgamma(n, shape = shape_x, rate = rate_g_x)
       }
       
       # Generare Y
-      if (input$dist_y_2d == "norm") {
-        req(input$mu_y_indep, input$sigma_y_indep)
-        y <- rnorm(n, mean = input$mu_y_indep, sd = input$sigma_y_indep)
-      } else if (input$dist_y_2d == "unif") {
-        req(input$range_unif_y)
-        y <- runif(n, min = input$range_unif_y[1], max = input$range_unif_y[2])
-      } else if (input$dist_y_2d == "exp") {
-        req(input$rate_y_indep)
-        y <- rexp(n, rate = input$rate_y_indep)
-      } else if (input$dist_y_2d == "gamma") {
-        req(input$shape_y_indep, input$rate_gamma_y)
-        y <- rgamma(n, shape = input$shape_y_indep, rate = input$rate_gamma_y)
+      if (dist_y == "norm") {
+        mu_y <- if(is.null(input$mu_y_indep)) 0 else input$mu_y_indep
+        sigma_y <- if(is.null(input$sigma_y_indep)) 1 else input$sigma_y_indep
+        y <- rnorm(n, mean = mu_y, sd = sigma_y)
+      } else if (dist_y == "unif") {
+        range_y <- if(is.null(input$range_unif_y)) c(-2, 2) else input$range_unif_y
+        y <- runif(n, min = range_y[1], max = range_y[2])
+      } else if (dist_y == "exp") {
+        rate_y <- if(is.null(input$rate_y_indep)) 1 else input$rate_y_indep
+        y <- rexp(n, rate = rate_y)
+      } else if (dist_y == "gamma") {
+        shape_y <- if(is.null(input$shape_y_indep)) 2 else input$shape_y_indep
+        rate_g_y <- if(is.null(input$rate_gamma_y)) 1 else input$rate_gamma_y
+        y <- rgamma(n, shape = shape_y, rate = rate_g_y)
       }
     } else {
       # Bivariate Normal
-      req(input$mu_x_2d, input$mu_y_2d, input$sigma_x_2d, input$sigma_y_2d, input$rho_2d)
-      mu <- c(input$mu_x_2d, input$mu_y_2d)
-      cov_xy <- input$rho_2d * input$sigma_x_2d * input$sigma_y_2d
-      sigma_mat <- matrix(c(input$sigma_x_2d^2, cov_xy, cov_xy, input$sigma_y_2d^2), 2, 2)
+      mu_x <- if(is.null(input$mu_x_2d)) 0 else input$mu_x_2d
+      mu_y <- if(is.null(input$mu_y_2d)) 0 else input$mu_y_2d
+      sigma_x <- if(is.null(input$sigma_x_2d)) 1 else input$sigma_x_2d
+      sigma_y <- if(is.null(input$sigma_y_2d)) 1 else input$sigma_y_2d
+      rho_val <- if(is.null(input$rho_2d)) 0 else input$rho_2d
+      
+      mu <- c(mu_x, mu_y)
+      cov_xy <- rho_val * sigma_x * sigma_y
+      sigma_mat <- matrix(c(sigma_x^2, cov_xy, cov_xy, sigma_y^2), 2, 2)
       
       out <- mvrnorm(n, mu = mu, Sigma = sigma_mat)
       x <- out[, 1]
       y <- out[, 2]
     }
     
+    trans_2d_val <- if(is.null(input$trans_2d)) "add" else input$trans_2d
+    
     # Transformare Z = h(X, Y)
-    z <- switch(input$trans_2d,
+    z <- switch(trans_2d_val,
                 "add" = x + y,
                 "sub" = x - y,
                 "mul" = x * y,
