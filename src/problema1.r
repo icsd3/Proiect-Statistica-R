@@ -10,8 +10,6 @@
 # 
 #
 
-set.seed(87)
-
 lambda  <- 1000 # PARAMETRIZABIL
 p       <- 0.01 # PARAMETRIZABIL
 #p      <- 0.05
@@ -275,8 +273,8 @@ plot(x, y, type = "b", col = "blue", pch = 16, lwd = 2,
   ylab = "Procent Sus Detectate"
 )
 
-y_1000 <- Repetare_Detect_Sus(100)
-plot(x, y_1000, type = "b", col = "darkblue", pch = 16, lwd = 2,
+y_100 <- Repetare_Detect_Sus(100)
+plot(x, y_100, type = "b", col = "darkblue", pch = 16, lwd = 2,
      main = "Procent sus detectate din sus total (media la toate zilele)",
      xlab = "Procent Verificate", 
      ylab = "Procent Sus Detectate"
@@ -285,4 +283,47 @@ plot(x, y_1000, type = "b", col = "darkblue", pch = 16, lwd = 2,
 # Se observa cum prin incercare aleatorie procentul de cereri suspicioase detectate creste linear cu
 # procentul de date verificate dintre cele totale DECI PROBABILITATEA DE DETECTIE SE MODIFICA LINEAR
 
+#CERINTE ULTERIOARE 
+# 1
+c_verif <- 1
+c_nedetect <- 1000
+CF_s <- c_verif * date$verificate_s + c_nedetect * date$nedetectate_s
+mean(CF_s)
 
+CF_a <- c_verif * date$verificate_a + c_nedetect * date$nedetectate_a
+mean(CF_a)
+
+CF_a2 <- c_verif * date$verificate_a2 + c_nedetect * date$nedetectate_a2
+mean(CF_a2)
+
+# 2
+
+repetare_cost <- function(k){
+  for(i in 1:k){
+    date$detectate_s <- rhyper(
+      nn <- nr_zile,
+      m = date$sus, # N2
+      n = date$normale, #N1
+      k = date$verificate_s # actual nr verificate
+    )
+    date$nedetectate_s <- date$sus - date$detectate_s
+    
+    date$detectate_a <- rhyper(
+      nn <- nr_zile,
+      m = date$sus, # N2
+      n = date$normale, #N1
+      k = date$verificate_a # actual nr verificate
+    )
+    date$nedetectate_a <- date$sus - date$detectate_a
+    
+    date$detectate_a2 <- rhyper(
+      nn <- nr_zile,
+      m = date$sus, # N2
+      n = date$normale, #N1
+      k = date$verificate_a2 # actual nr verificate
+    )
+    date$nedetectate_a2 <- date$sus - date$detectate_a2
+    
+    
+  }
+}

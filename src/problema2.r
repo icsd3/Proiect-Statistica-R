@@ -141,6 +141,13 @@ ui <- fluidPage(
         )
       )
     )
+  ),
+  tags$head(
+    tags$style(HTML("
+    #stats_xy_2d table tbody tr:nth-child(n+3) {
+      background-color: transparent !important;
+    }
+  "))
   )
 )
 
@@ -365,17 +372,17 @@ server <- function(input, output, session) {
   output$stats_x_2d <- renderTable({
     df <- sim_data_2d()
     calc_stats(df$X)
-  }, digits = 4)
+  }, digits = 4,striped = TRUE,width = "100%")
   
   output$stats_y_2d <- renderTable({
     df <- sim_data_2d()
     calc_stats(df$Y)
-  }, digits = 4)
+  }, digits = 4,striped = TRUE,width = "100%")
   
   output$stats_z_2d <- renderTable({
     df <- sim_data_2d()
     calc_stats(df$Z)
-  }, digits = 4)
+  }, digits = 4,striped = TRUE,width = "100%")
   
   output$stats_xy_2d <- renderTable({
     df <- sim_data_2d()
@@ -383,7 +390,7 @@ server <- function(input, output, session) {
       Indicator = c("Covarianță Empirică (X,Y)", "Coeficient de Corelație (X,Y)", "\u2003", "\u2003", "\u2003", "\u2003", "\u2003", "\u2003"), #unicode spatiere ca sa stea aranjate :)
       Valoare = c(cov(df$X, df$Y), cor(df$X, df$Y), "\u2003", "\u2003", "\u2003", "\u2003", "\u2003", "\u2003")
     )
-  }, digits = 4)
+  }, digits = 4,striped = TRUE,width = "100%")
   
   # Avertisment UI pentru cazurile în care g(x) generează NaN (ex: log(-1))
   output$warnings <- renderUI({
