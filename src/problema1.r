@@ -344,7 +344,7 @@ mean(CF_a)
 CF_a2 <- c_verif * date$verificate_a2 + c_nedetect * date$nedetectate_a2
 mean(CF_a2)
 
-CF_a3 <- c_verif * date$verificate_a3 + c_nedetect * date$nedetectate_a3
+CF_a2 <- c_verif * date$verificate_a3 + c_nedetect * date$nedetectate_a3
 mean(CF_a3)
 
 # 2
