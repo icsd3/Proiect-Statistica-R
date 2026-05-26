@@ -253,8 +253,8 @@ plot(date$zi, cumsum(date$sus), type = "l", col = "red", lwd = 2,
 lines(date$zi, cumsum(date$detectate_s), col = "lightblue", lwd = 2)
 lines(date$zi, cumsum(date$detectate_a), col = "blue", lwd = 2)
 lines(date$zi, cumsum(date$detectate_a2), col = "darkblue", lwd = 2)
-lines(date$zi, cumsum(date$detectate_a3), col = "darkred", lwd = 2 )
-legend("topright", legend = c("Cereri Suspecte", "Cereri Detectate Simplu","Cereri Detectate Adaptiv","Cereri Detectate Adaptiv propus"), col = c("red", "lightblue","blue","darkblue"), lwd = 2)
+lines(date$zi, cumsum(date$detectate_a3), col = "cornflowerblue", lwd = 2 )
+legend("topright", legend = c("Cereri Suspecte", "Cereri Detectate Simplu","Cereri Detectate Adaptiv","Cereri Detectate Adaptiv propus","Cereri Detectate Adaptiv propus 2"), col = c("red", "lightblue","blue","darkblue","cornflowerblue"), lwd = 2)
 
 # d)        - Evolutia zilnica a nr de cereri sus si cereri detectate
 
@@ -352,6 +352,7 @@ mean(CF_a3)
 costuri_s <- numeric(nr_repet)
 costuri_a <- numeric(nr_repet)
 costuri_a2 <- numeric(nr_repet)
+costuri_a3 <- numeric(nr_repet)
 
 for(i in 1:nr_repet){
   set.seed(i)
@@ -366,16 +367,23 @@ for(i in 1:nr_repet){
   date$detectate_a2 <- rhyper(nn <- nr_zile, m = date$sus, n = date$normale, k = date$verificate_a2)
   date$nedetectate_a2 <- date$sus - date$detectate_a2
   costuri_a2[i] <- mean(c_verif * date$verificate_a2 + c_nedetect * date$nedetectate_a2)
+  
+  date$detectate_a3 <- rhyper(nn <- nr_zile, m = date$sus, n = date$normale, k = date$verificate_a3)
+  date$nedetectate_a3 <- date$sus - date$detectate_a3
+  costuri_a3[i] <- mean(c_verif * date$verificate_a3 + c_nedetect * date$nedetectate_a3)
 }
 
 head(costuri_s)
 head(costuri_a)
 head(costuri_a2)
+head(costuri_a3)
 
 mean(costuri_s)
 mean(costuri_a)
 mean(costuri_a2)
+mean(costuri_a3)
 
 sd(costuri_s)
 sd(costuri_a)
 sd(costuri_a2)
+sd(costuri_a3)
