@@ -107,7 +107,7 @@ for(i in 1:nr_zile) {
           k = verificari_actuale[i]
      )
 }
-# E DOG SHIT
+# E DOG SHIT / nu stiu sa implementez :)
 
 
 ### VERIFICARE ADAPTIVA 3.1 ###
@@ -132,7 +132,13 @@ for(i in 1:nr_zile) {
 
 base_proc <- 10 / 100
 max_proc <- 85 / 100 # limita la spike-uri.
-Z_prag <- 0.9 # De la cate deviatii standard (Z-score) incepem sa fim agresivi.
+# 1.5 e muci
+# 0.9 e mai okay (a adus costul cel mai jos pana acm)
+# 0.75 a dat cel mai bun randament
+# 0.15 este primul index care a dat costuri 6k.
+# shockers inflexiunea e la 0....
+
+Z_prag <- 0 # De la cate deviatii standard (Z-score) incepem sa fim agresivi.
 steepness <- 2 # Cat de brusc crestem agresivitatea.
 
 #Calcul Z-Score: (valoare_zi - Medie) / Deviatie_Standard

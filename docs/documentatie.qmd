@@ -354,7 +354,7 @@ head(date$nedetectate_s)
 
 ```
 
-#### b) Verificare adaptiva
+#### b) Verificare adaptiva 1
 
 Crestem procentul odata ce vedem ca numarul de cereri din acea zi este mai mare decat media lambda
 
@@ -375,7 +375,7 @@ head(date$nedetectate_a)
 
 ```
 
-#### c) Verificare propusa
+#### c) Verificare adaptiva 2
 
 Procedam ca la punctul b doar ca de aceasta data, incercam ceva si mai agresiv care sa identifice mai multe cereri suspecte.
 
@@ -396,7 +396,7 @@ head(date$nedetectate_a2)
 
 ```
 
-### d) Verificare adaptiva bazata pe Z-score
+#### d) Verificare adaptiva bazata pe Z-score (3)
 
 Problema unei probabilitati constante (in cazul nostru 0.01, 0.05 si 0.2) si dorinta minimizarii costului de verificare si ratare a unei cereri suspecte duce la urmatoarele constatari:
 
@@ -408,9 +408,10 @@ Pentru aceasta strategie de verificare am incercat sa folosim o functie Sigmoida
 Functia logistica standard (sau sigmoida) este de forma:
 
 $$f(x) = \frac{1}{1+e^{-x}}$$
+
 Adaptata problemei noastre aceasta ia urmatoarea forma:
 
-$$f(x) = \text{procent_baza} + \frac{\text{procent_maxim} - \text{procent_baza}}{1 + e^{-k(x - x_0)}}$$
+$$f(x) = \text{procent baza} + \frac{\text{procent maxim} - \text{procent baza}}{1 + e^{-k(x - x_0)}}$$
 
 Unde:
 
@@ -418,13 +419,15 @@ Unde:
 - procent_maxim = 85% din cereri, asimptota superioara a functiei sigmoide
 - k = parametrul de "steepness", care determina cat de abrupta este trecerea din starea normala in starea de alerta, adica detectarea spike-urilor.
 - x = metrica pe care o evaluam, adica Z-score
-- $$x_0$$ = punctul de inflexiune
+- x_0 = punctul de inflexiune
+
+Pentru cazul nostru, vom considera k = 2 si inflexiunea sa fie la 0.
 
 
 ```{r}
 base_proc <- 10 / 100
 max_proc <- 85 / 100
-Z_prag <- 1.5
+Z_prag <- 0
 steepness <- 2
 
 deviatie_std <- sqrt(lambda)
@@ -547,12 +550,25 @@ Am facut un plot pentru zile impartit la numarul decereri:
 #| echo: true
 #| fig-align: center
 plot(date$zi, date$sus, type = "l", col = "red", lwd = 2,
-     main = "Evolutia zilnica a cererilor sus si detectate",
+     main = "Evolutia zilnica a cererilor sus si detectate,ver. simpla",
      xlab = "Ziua",
      ylab = "Nr. cereri",
      ylim = c(0, max(date$sus))
      )
 lines(date$zi, date$detectate_s, col = "blue", lwd = 2)
+
+```
+
+```{r}
+#| echo: true
+#| fig-align: center
+plot(date$zi, date$sus, type = "l", col = "red", lwd = 2,
+     main = "Evolutia zilnica a cererilor sus si detectate,ver. adaptiva 3",
+     xlab = "Ziua",
+     ylab = "Nr. cereri",
+     ylim = c(0, max(date$sus))
+     )
+lines(date$zi, date$detectate_a3, col = "blue", lwd = 2)
 
 ```
 
@@ -628,7 +644,7 @@ Se observa cum prin incercare aleatorie procentul de cereri suspicioase detectat
 
 ### Cerinta 8
 
-In concluzie, se observa cum abordarea simpla aleatorie nu este destul pentru a detecta majoritatea cererilor suspicioase iar o abordare dinamica este necesara pentru a gasi mai multe cereri suspicioase in zilele cu mai multe cereri in general, iar pentru zilele cu mai putine cereri nu avem de ce sa cautam atat de multe cereri suspicioase doarece nu sunt atat de mult de gasit. Strategia simpla este buna in sensul ca gaseste consistent un numar de cereri suspicioase pe zi raportat la numarul de cereri totale dar daca vrem sa maximizam numarul de cereri suspicioase gasite in raport cu numarul de incercari, atunci abordarea simpla pica.
+In concluzie, se observa cum abordarea simpla aleatorie nu este destul pentru a detecta majoritatea cererilor suspicioase iar o abordare dinamica este necesara pentru a gasi mai multe cereri suspicioase in zilele cu mai multe cereri in general, iar pentru zilele cu mai putine cereri nu avem de ce sa cautam atat de multe cereri suspicioase doarece nu sunt atat de mult de gasit. Strategia simpla este buna in sensul ca gaseste consistent un numar de cereri suspicioase pe zi raportat la numarul de cereri totale dar daca vrem sa maximizam numarul de cereri suspicioase gasite in raport cu numarul de incercari, atunci abordarea simpla pica. Abordarile dinamice au dus la reducerea costului implicat in verificari deoarece fiecare strategie a incercat sa reactioneze la schimbari fie in raport de medie si depasari ale acesteia fie prin adaptari la spike-uri de cereri suspicioase, strategia optima fiind ceea care a utilizat functia sigmoida, care a reusit sa creasca exponential numarul de verificari necesare pe zi in functie de numarul de cereri suspicioase.
 
 ## Cerinta ulterioara
 
@@ -702,6 +718,8 @@ Probabilitatiile teoretice sunt valorile exacte obtinute prin demonstratie matem
 
 # Documentatie Problema 2
 
+In realizarea aplicatiei Shiny am folosit urmatoarele pachete: shiny, ggplot2, shinythemes pentru dark-theme si MASS pentru functia mvrnorm.
+
 ## Cerinta obligatorie
 
 ### Cerinta 1
@@ -742,13 +760,18 @@ Repartitia gamma: ![](cerinta24.png){width="50%" fig-align="center"}
 
 ![](cerinta7.png){width="100%" fig-align="center"}
 
+##TO:DO CA NU MAI AM CHEF.
+## EXPLICATI CUM SE GENEREAZA TABELUL ASTA TOTU E IN CODU DE program1.r la functia calc_auto. Adica ce inseamna acel skewness (Pearson stuff din sursa), restul is cam ez de explicat.
+
 ### Cerinta 8
 
-Lorem ipsum dolor sit amet consectetur adipiscing elit. Quisque faucibus ex sapien vitae pellentesque sem placerat. In id cursus mi pretium tellus duis convallis. Tempus leo eu aenean sed diam urna tempor. Pulvinar vivamus fringilla lacus nec metus bibendum egestas. Iaculis massa nisl malesuada lacinia integer nunc posuere. Ut hendrerit semper vel class aptent taciti sociosqu. Ad litora torquent per conubia nostra inceptos himenaeos.
+Vom considera$$X \sim N(0, 1)$ si transformarile $Y = \log{X} \text{ si } Y = e^X$
+.
 
-Lorem ipsum dolor sit amet consectetur adipiscing elit. Quisque faucibus ex sapien vitae pellentesque sem placerat. In id cursus mi pretium tellus duis convallis. Tempus leo eu aenean sed diam urna tempor. Pulvinar vivamus fringilla lacus nec metus bibendum egestas. Iaculis massa nisl malesuada lacinia integer nunc posuere. Ut hendrerit semper vel class aptent taciti sociosqu. Ad litora torquent per conubia nostra inceptos himenaeos.
 
-Lorem ipsum dolor sit amet consectetur adipiscing elit. Quisque faucibus ex sapien vitae pellentesque sem placerat. In id cursus mi pretium tellus duis convallis. Tempus leo eu aenean sed diam urna tempor. Pulvinar vivamus fringilla lacus nec metus bibendum egestas. Iaculis massa nisl malesuada lacinia integer nunc posuere. Ut hendrerit semper vel class aptent taciti sociosqu. Ad litora torquent per conubia nostra inceptos himenaeos.
+Transformarea $Y = e^X$ transforma valorile negative ale lui X in valori subunitare ($0 < e^X < 1$), cele pozitive dau valori supraunitare. In acest caz, Y va fi mereu pozitiva, asimetrica spre dreapta. Valorile mari sunt rare dar pot fi foarte mari.
+
+Transformarea $Y = log(X)$ este problematica deoarece log(x) nu este definita pentru valori mai mici sau egale cu 0. Deoarece X ia valori negative cu o probabilitate de 50%, aceasta transformare este invalida pe jumatate din domeniu. Aplicatia noastra elimina in acest caz valorile care sunt fie NaN, fie infinite.
 
 ## Componentă bidimensională obligatorie
 
@@ -765,3 +788,17 @@ Lorem ipsum dolor sit amet consectetur adipiscing elit. Quisque faucibus ex sapi
 ### Cerinta 5
 
 ### Cerinta 6
+
+Parametrul de corelatie are un efect direct, liniar si proportional asupra covariantei. Avand abateriile standard $\sigma_X$ si $\sigma_Y$ constante, influenta lui $\rho$ este urmatoarea:
+
+- Daca $\rho = 0$ covarianta tinde spre 0, indiferent de marimea abaterilor standard. Cele doua variabile nu prezinta o tendinta liniara de a creste sau descreste impreuna. Norul de puncte este circular sau o elipsa usoara.
+
+![](Cerinta26p0.png){width="100%" fig-align="center"}
+
+- Daca $\rho = 0.5$ covarianta devine pozitiva. Cresterea parametrului mareste direct proportional covarianta. Norul de puncte ia o forma elipsoida spre dreapta-sus, indicand ca valorile mari ale lui X tind sa fie asociate cu valori mari ale lui Y.
+
+![](Cerinta26p05.png){width="100%" fig-align="center"}
+
+- Daca $\rho = -0.5$ covarianta devine negativa. Pe masura ce parametrul se aproprie de -1, covarianta scade. Norul de puncte ia o forma elipsoida si se inclina spre dreapta-jos, indicand ca valorile mari ale lui X sunt asociate cu valori mici ale lui Y.
+
+![](Cerinta26pn05.png){width="100%" fig-align="center"}
