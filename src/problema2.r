@@ -146,7 +146,17 @@ ui <- fluidPage(
   # Pseudo footer for credits
   tags$div(
     style = "text-align: center; margin-top: 20px; padding-top: 20px; border-top: 1px solid #444; margin-bottom: 20px;",
-    h5("Credite:", style = "margin-bottom: 15px;"),
+    h4(
+      "Credite:",
+      style = "
+        margin-bottom: 15px;
+        background: linear-gradient(90deg, red, orange, yellow, green, blue, indigo, violet);
+        background-size: 400% 400%;
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        animation: rainbow 6s ease infinite;
+      "
+    ),
     fluidRow(
       column(
         width = 3,
@@ -188,8 +198,17 @@ ui <- fluidPage(
     #stats_xy_2d table tbody tr:nth-child(n+3) {
       background-color: transparent !important;
     }
+    @keyframes rainbow {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+  }
   "))
-  )
+  ),
+
+  
+
+
 )
 
 # --- LOGICA SERVERULUI ---
