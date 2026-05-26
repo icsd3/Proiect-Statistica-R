@@ -287,6 +287,7 @@ plot(x, y_100, type = "b", col = "darkblue", pch = 16, lwd = 2,
 # 1
 c_verif <- 1
 c_nedetect <- 1000
+nr_repet <- 1000
 CF_s <- c_verif * date$verificate_s + c_nedetect * date$nedetectate_s
 mean(CF_s)
 
@@ -298,32 +299,33 @@ mean(CF_a2)
 
 # 2
 
-repetare_cost <- function(k){
-  for(i in 1:k){
-    date$detectate_s <- rhyper(
-      nn <- nr_zile,
-      m = date$sus, # N2
-      n = date$normale, #N1
-      k = date$verificate_s # actual nr verificate
-    )
-    date$nedetectate_s <- date$sus - date$detectate_s
-    
-    date$detectate_a <- rhyper(
-      nn <- nr_zile,
-      m = date$sus, # N2
-      n = date$normale, #N1
-      k = date$verificate_a # actual nr verificate
-    )
-    date$nedetectate_a <- date$sus - date$detectate_a
-    
-    date$detectate_a2 <- rhyper(
-      nn <- nr_zile,
-      m = date$sus, # N2
-      n = date$normale, #N1
-      k = date$verificate_a2 # actual nr verificate
-    )
-    date$nedetectate_a2 <- date$sus - date$detectate_a2
-    
-    
-  }
+costuri_s <- numeric(nr_repet)
+costuri_a <- numeric(nr_repet)
+costuri_a2 <- numeric(nr_repet)
+
+for(i in 1:nr_repet){
+  set.seed(i)
+  date$detectate_s <- rhyper(nn <- nr_zile, m = date$sus,n = date$normale,k = date$verificate_s)
+  date$nedetectate_s <- date$sus - date$detectate_s
+  costuri_s[i] <- mean(c_verif * date$verificate_s + c_nedetect * date$nedetectate_s)
+  
+  date$detectate_a <- rhyper(nn <- nr_zile,m = date$sus,n = date$normale,k = date$verificate_a)
+  date$nedetectate_a <- date$sus - date$detectate_a
+  costuri_a[i] <- mean(c_verif * date$verificate_a + c_nedetect * date$nedetectate_a)
+  
+  date$detectate_a2 <- rhyper(nn <- nr_zile, m = date$sus, n = date$normale, k = date$verificate_a2)
+  date$nedetectate_a2 <- date$sus - date$detectate_a2
+  costuri_a2[i] <- mean(c_verif * date$verificate_a2 + c_nedetect * date$nedetectate_a2)
 }
+
+head(costuri_s)
+head(costuri_a)
+head(costuri_a2)
+
+mean(costuri_s)
+mean(costuri_a)
+mean(costuri_a2)
+
+sd(costuri_s)
+sd(costuri_a)
+sd(costuri_a2)

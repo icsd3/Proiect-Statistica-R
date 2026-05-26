@@ -596,4 +596,65 @@ In concluzie, se observa cum abordarea simpla aleatorie nu este destul pentru a 
 
 ## Cerinta ulterioara
 
-DE FACUT
+### Cerinta 1
+
+```{r}
+c_verif <- 1
+c_nedetect <- 1000
+nr_repet <- 1000
+CF_s <- c_verif * date$verificate_s + c_nedetect * date$nedetectate_s
+mean(CF_s)
+
+CF_a <- c_verif * date$verificate_a + c_nedetect * date$nedetectate_a
+mean(CF_a)
+
+CF_a2 <- c_verif * date$verificate_a2 + c_nedetect * date$nedetectate_a2
+mean(CF_a2)
+```
+
+### Cerinta 2
+
+```{r}
+
+costuri_s <- numeric(nr_repet)
+costuri_a <- numeric(nr_repet)
+costuri_a2 <- numeric(nr_repet)
+
+for(i in 1:nr_repet){
+  set.seed(i)
+  date$detectate_s <- rhyper(nn <- nr_zile, m = date$sus,n = date$normale,k = date$verificate_s)
+  date$nedetectate_s <- date$sus - date$detectate_s
+  costuri_s[i] <- mean(c_verif * date$verificate_s + c_nedetect * date$nedetectate_s)
+  
+  date$detectate_a <- rhyper(nn <- nr_zile,m = date$sus,n = date$normale,k = date$verificate_a)
+  date$nedetectate_a <- date$sus - date$detectate_a
+  costuri_a[i] <- mean(c_verif * date$verificate_a + c_nedetect * date$nedetectate_a)
+  
+  date$detectate_a2 <- rhyper(nn <- nr_zile, m = date$sus, n = date$normale, k = date$verificate_a2)
+  date$nedetectate_a2 <- date$sus - date$detectate_a2
+  costuri_a2[i] <- mean(c_verif * date$verificate_a2 + c_nedetect * date$nedetectate_a2)
+}
+
+head(costuri_s)
+head(costuri_a)
+head(costuri_a2)
+
+mean(costuri_s)
+mean(costuri_a)
+mean(costuri_a2)
+
+sd(costuri_s)
+sd(costuri_a)
+sd(costuri_a2)
+```
+
+### Cerinta 3
+
+Probabilitatiile teoretice sunt valorile exacte obtinute prin demonstratie matematica, folosind teoreme si functii de masa sau densitate de probabilitate.
+Probabilitatiile simulate sunt valori aproximative obtinute prin simularea unui model de un numar mare de ori si extragerea unori statistici cum ar fi media sau deviata standard din setul de date. 
+
+# Documentatie Problema 2
+
+1. Construiți o aplicație Shiny cu o interfață clară, care să conțină cel puțin
+următoarele secțiuni:
+
