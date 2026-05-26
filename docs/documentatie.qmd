@@ -305,7 +305,7 @@ date <- data.frame(
 
 ### Cerinta 2
 
-Putem considera ca numarul total de accesuri per zi urmaresc repartitia Poisson, deoarece modelul nostru matematic se bazeaza pe evenimente ce se intampla intr-un interval fix. Puteam alege si alte repartii deoarece nu avem detalii despre cereri, cat timp ne asiguram ca acestea sunt marginite.
+Putem considera ca numarul total de accesuri per zi urmaresc repartitia Poisson, deoarece modelul nostru matematic se bazeaza pe evenimente independente ce se intampla si sunt numarabile intr-un interval fix, avand adesea o rata medie de aparitie pe care o stim aproximativ constanta. Puteam alege si alte repartii deoarece nu avem detalii despre cereri, cat timp ne asiguram ca acestea sunt marginite.
 
 Am ales lambda un numar care sa fie mai mare astfel incat simularile sa fie mai apropiate de o situație mai realistică (i.e. 1000 de accesări în mediu per zi al resursei online).
 
@@ -396,7 +396,30 @@ head(date$nedetectate_a2)
 
 ```
 
-Alta incercare de verificare esuata.
+### d) Verificare adaptiva bazata pe Z-score
+
+Problema unei probabilitati constante (in cazul nostru 0.01, 0.05 si 0.2) si dorinta minimizarii costului de verificare si ratare a unei cereri suspecte duce la urmatoarele constatari:
+
+- Daca $p \cdot C_{\text{ratare}} > C_{\text{verificare}}$, strategia optima este sa verifici toate cererile
+- Daca $p \cdot C_{\text{ratare}} < C_{\text{verificare}}$, strategia optima este sa nu verifici nimic.
+
+Pentru aceasta strategie de verificare am incercat sa folosim o functie Sigmoida aplicata pe un scor Z (cate deviatii standard fata de medie are traficul dintr-o zi respectiva). Aceasta tine procentul de verificare mic, adica 10%, in zilele normale, dar va deveni "agresiva" si va creste spre procente mai mari (maxim 85%) pe spike-uri.
+
+Functia logistica standard (sau sigmoida) este de forma:
+
+$$f(x) = \frac{1}{1+e^{-x}}$$
+Adaptata problemei noastre aceasta ia urmatoarea forma:
+
+$$f(x) = \text{procent_baza} + \frac{\text{procent_maxim} - \text{procent_baza}}{1 + e^{-k(x - x_0)}}$$
+
+Unde:
+
+- procent_baza = 10% din cereri minimul, asimptota inferioara a functiei sigmoide
+- procent_maxim = 85% din cereri, asimptota superioara a functiei sigmoide
+- k = parametrul de "steepness", care determina cat de abrupta este trecerea din starea normala in starea de alerta, adica detectarea spike-urilor.
+- x = metrica pe care o evaluam, adica Z-score
+- $$x_0$$ = punctul de inflexiune
+
 
 ```{r}
 base_proc <- 10 / 100
@@ -425,7 +448,7 @@ head(date$nedetectate_a3)
 
 ### Cerinta 5
 
--   Probabilitatea empirică de a detecta cel puțin o cerere suspectă într-o zi
+- Probabilitatea empirică de a detecta cel puțin o cerere suspectă într-o zi
 
 ```{r}
 
@@ -434,28 +457,28 @@ prob_empiric <- sum(vector_logic) / length(vector_logic)
 prob_empiric
 ```
 
--   Proporția medie de cereri suspecte detectate
+- Proporția medie de cereri suspecte detectate
 
 ```{r}
 
 mean(date$detectate_s / date$sus)
 ```
 
--   Proporția medie de cereri suspecte nedetectate
+- Proporția medie de cereri suspecte nedetectate
 
 ```{r}
 
 mean(date$nedetectate_s / date$sus)
 ```
 
--   Numărul mediu de verificări efectuate zilnic
+- Numărul mediu de verificări efectuate zilnic
 
 ```{r}
 
 mean(date$verificate_s)
 ```
 
--   Un indicator de eficiență, ales și definit de echipă
+- Un indicator de eficiență, ales și definit de echipă
 
 Aici am ales ca indicator de eficienta media de cereri suspecte detectate dintre cele verificate.
 
@@ -466,7 +489,7 @@ mean(date$detectate_s) / mean(date$verificate_s) * 100
 
 ### Cerinta 6
 
--   Histograma numărului de cereri suspecte pe zi
+- Histograma numărului de cereri suspecte pe zi
 
 ```{r}
 #| echo: true
@@ -482,7 +505,7 @@ hist(date$sus,
 
 ```
 
--   Histograma numărului de cereri suspecte detectate
+- Histograma numărului de cereri suspecte detectate
 
 ```{r}
 #| echo: true
@@ -498,7 +521,7 @@ hist(date$detectate_s,
 
 ```
 
--   Grafic comparativ între strategiile de verificare
+- Grafic comparativ între strategiile de verificare
 
 ```{r}
 #| echo: true
@@ -516,7 +539,7 @@ lines(date$zi, cumsum(date$detectate_a3), col = "cornflowerblue", lwd = 2)
 
 ```
 
--   Evoluția zilnică a cererilor suspecte și a celor detectate
+- Evoluția zilnică a cererilor suspecte și a celor detectate
 
 Am facut un plot pentru zile impartit la numarul decereri:
 
@@ -675,8 +698,7 @@ sd(costuri_a3)
 
 ### Cerinta 3
 
-Probabilitatiile teoretice sunt valorile exacte obtinute prin demonstratie matematica, folosind teoreme si functii de masa sau densitate de probabilitate.
-Probabilitatiile simulate sunt valori aproximative obtinute prin simularea unui model de un numar mare de ori si extragerea unori statistici cum ar fi media sau deviata standard din setul de date. 
+Probabilitatiile teoretice sunt valorile exacte obtinute prin demonstratie matematica, folosind teoreme si functii de masa sau densitate de probabilitate. Probabilitatiile simulate sunt valori aproximative obtinute prin simularea unui model de un numar mare de ori si extragerea unori statistici cum ar fi media sau deviata standard din setul de date.
 
 # Documentatie Problema 2
 
@@ -686,44 +708,39 @@ Probabilitatiile simulate sunt valori aproximative obtinute prin simularea unui 
 
 Poza cu structura aplicatiei si privire din ansamblu.
 
-![](cerinta1.png){width=100% fig-align="center"}
+![](cerinta1.png){width="100%" fig-align="center"}
 
 ### Cerinta 2
 
 \newpage
 
-Repartitia normala:
-![](cerinta21.png){width=50% fig-align="center"}
+Repartitia normala: ![](cerinta21.png){width="50%" fig-align="center"}
 
-Repartitia uniforma:
-![](cerinta22.png){width=50% fig-align="center"}
+Repartitia uniforma: ![](cerinta22.png){width="50%" fig-align="center"}
 
-Repartitia exponentiala:
-![](cerinta23.png){width=50% fig-align="center"}
+Repartitia exponentiala: ![](cerinta23.png){width="50%" fig-align="center"}
 
-Repartitia gamma:
-![](cerinta24.png){width=50% fig-align="center"}
+Repartitia gamma: ![](cerinta24.png){width="50%" fig-align="center"}
 
 ### Cerinta 3
 
-![](cerinta3.png){width=60% fig-align="center"}
-![](cerinta31.png){width=60% fig-align="center"}
+![](cerinta3.png){width="60%" fig-align="center"} ![](cerinta31.png){width="60%" fig-align="center"}
 
 ### Cerinta 4
 
-![](cerinta4.png){width=50% fig-align="center"}
+![](cerinta4.png){width="50%" fig-align="center"}
 
 ### Cerinta 5
 
-![](cerinta5.png){width=50% fig-align="center"}
+![](cerinta5.png){width="50%" fig-align="center"}
 
 ### Cerinta 6
 
-![](cerinta6.png){width=100% fig-align="center"}
+![](cerinta6.png){width="100%" fig-align="center"}
 
 ### Cerinta 7
 
-![](cerinta7.png){width=100% fig-align="center"}
+![](cerinta7.png){width="100%" fig-align="center"}
 
 ### Cerinta 8
 
@@ -737,7 +754,7 @@ Lorem ipsum dolor sit amet consectetur adipiscing elit. Quisque faucibus ex sapi
 
 ### Cerinta 1
 
-![](C1.png){width=100% fig-align="center"}
+![](C1.png){width="100%" fig-align="center"}
 
 ### Cerinta 2
 

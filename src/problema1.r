@@ -132,7 +132,7 @@ for(i in 1:nr_zile) {
 
 base_proc <- 10 / 100
 max_proc <- 85 / 100 # limita la spike-uri.
-Z_prag <- 1.5 # De la cate deviatii standard (Z-score) incepem sa fim agresivi.
+Z_prag <- 0.9 # De la cate deviatii standard (Z-score) incepem sa fim agresivi.
 steepness <- 2 # Cat de brusc crestem agresivitatea.
 
 #Calcul Z-Score: (valoare_zi - Medie) / Deviatie_Standard
@@ -344,7 +344,7 @@ mean(CF_a)
 CF_a2 <- c_verif * date$verificate_a2 + c_nedetect * date$nedetectate_a2
 mean(CF_a2)
 
-CF_a2 <- c_verif * date$verificate_a3 + c_nedetect * date$nedetectate_a3
+CF_a3 <- c_verif * date$verificate_a3 + c_nedetect * date$nedetectate_a3
 mean(CF_a3)
 
 # 2
