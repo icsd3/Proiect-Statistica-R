@@ -36,10 +36,10 @@ geometry:
 # Fiecare zi are un total n de accesuri
 # Accese per zi ~ Poisson(365, lambda)
 
-# 
-#
 
-set.seed(87)
+
+
+#set.seed(87)
 
 lambda  <- 1000 # PARAMETRIZABIL
 p       <- 0.01 # PARAMETRIZABIL
@@ -396,6 +396,33 @@ head(date$nedetectate_a2)
 
 ```
 
+Alta incercare de verificare esuata.
+
+```{r}
+base_proc <- 10 / 100
+max_proc <- 85 / 100
+Z_prag <- 1.5
+steepness <- 2
+
+deviatie_std <- sqrt(lambda)
+date$Z_score <- (date$total - lambda) / deviatie_std
+
+proc_risk <- base_proc + (max_proc - base_proc)/(1 + exp(-steepness * (date$Z_score - Z_prag)))
+
+date$verificate_a3 <- floor(date$total * proc_risk)
+
+date$verificate_a3 <- pmin(date$verificate_a3, date$total)
+
+date$detectate_a3 <- rhyper(
+  nn <- nr_zile,
+  m = date$sus,
+  n = date$normale,
+  k = date$verificate_a3
+)
+date$nedetectate_a3 <- date$sus - date$detectate_a3
+head(date$nedetectate_a3)
+```
+
 ### Cerinta 5
 
 -   Probabilitatea empirică de a detecta cel puțin o cerere suspectă într-o zi
@@ -485,15 +512,7 @@ plot(date$zi, cumsum(date$sus), type = "l", col = "red", lwd = 2,
 lines(date$zi, cumsum(date$detectate_s), col = "lightblue", lwd = 2)
 lines(date$zi, cumsum(date$detectate_a), col = "blue", lwd = 2)
 lines(date$zi, cumsum(date$detectate_a2), col = "darkblue", lwd = 2)
-legend("topright",
-      legend = c(
-        "Cereri Suspecte",
-        "Cereri Detectate Simplu",
-        "Cereri Detectate Adaptiv",
-        "Cereri Detectate Adaptiv propus"),
-      col = c("red", "lightblue","blue","darkblue"),
-      lwd = 2
-)
+lines(date$zi, cumsum(date$detectate_a3), col = "cornflowerblue", lwd = 2)
 
 ```
 
@@ -511,19 +530,13 @@ plot(date$zi, date$sus, type = "l", col = "red", lwd = 2,
      ylim = c(0, max(date$sus))
      )
 lines(date$zi, date$detectate_s, col = "blue", lwd = 2)
-legend(
-  "topright", 
-  legend = c("Cereri Sus", "Cereri Detectate"),
-  col = c("red", "blue"),
-  lwd = 2
-)
 
 ```
 
 ### Cerinta 7
 
 ```{r}
-
+#| fig-align: center
 val_sim <- vector("list", nr_zile)
 
 for(i in 1:nr_zile) {
@@ -610,15 +623,20 @@ mean(CF_a)
 
 CF_a2 <- c_verif * date$verificate_a2 + c_nedetect * date$nedetectate_a2
 mean(CF_a2)
+
+CF_a3 <- c_verif * date$verificate_a3 + c_nedetect * date$nedetectate_a3
+mean(CF_a3)
 ```
 
 ### Cerinta 2
 
 ```{r}
 
+
 costuri_s <- numeric(nr_repet)
 costuri_a <- numeric(nr_repet)
 costuri_a2 <- numeric(nr_repet)
+costuri_a3 <- numeric(nr_repet)
 
 for(i in 1:nr_repet){
   set.seed(i)
@@ -630,22 +648,29 @@ for(i in 1:nr_repet){
   date$nedetectate_a <- date$sus - date$detectate_a
   costuri_a[i] <- mean(c_verif * date$verificate_a + c_nedetect * date$nedetectate_a)
   
-  date$detectate_a2 <- rhyper(nn <- nr_zile, m = date$sus, n = date$normale, k = date$verificate_a2)
+  date$detectate_a2 <- rhyper(nn <- nr_zile, m = date$sus,n=date$normale,k=date$verificate_a2)
   date$nedetectate_a2 <- date$sus - date$detectate_a2
   costuri_a2[i] <- mean(c_verif * date$verificate_a2 + c_nedetect * date$nedetectate_a2)
+  
+  date$detectate_a3 <- rhyper(nn <- nr_zile, m = date$sus,n=date$normale,k=date$verificate_a3)
+  date$nedetectate_a3 <- date$sus - date$detectate_a3
+  costuri_a3[i] <- mean(c_verif * date$verificate_a3 + c_nedetect * date$nedetectate_a3)
 }
 
 head(costuri_s)
 head(costuri_a)
 head(costuri_a2)
+head(costuri_a3)
 
 mean(costuri_s)
 mean(costuri_a)
 mean(costuri_a2)
+mean(costuri_a3)
 
 sd(costuri_s)
 sd(costuri_a)
 sd(costuri_a2)
+sd(costuri_a3)
 ```
 
 ### Cerinta 3
@@ -655,6 +680,71 @@ Probabilitatiile simulate sunt valori aproximative obtinute prin simularea unui 
 
 # Documentatie Problema 2
 
-1. Construiți o aplicație Shiny cu o interfață clară, care să conțină cel puțin
-următoarele secțiuni:
+## Cerinta obligatorie
 
+### Cerinta 1
+
+Poza cu structura aplicatiei si privire din ansamblu.
+
+![](cerinta1.png){width=100% fig-align="center"}
+
+### Cerinta 2
+
+\newpage
+
+Repartitia normala:
+![](cerinta21.png){width=50% fig-align="center"}
+
+Repartitia uniforma:
+![](cerinta22.png){width=50% fig-align="center"}
+
+Repartitia exponentiala:
+![](cerinta23.png){width=50% fig-align="center"}
+
+Repartitia gamma:
+![](cerinta24.png){width=50% fig-align="center"}
+
+### Cerinta 3
+
+![](cerinta3.png){width=60% fig-align="center"}
+![](cerinta31.png){width=60% fig-align="center"}
+
+### Cerinta 4
+
+![](cerinta4.png){width=50% fig-align="center"}
+
+### Cerinta 5
+
+![](cerinta5.png){width=50% fig-align="center"}
+
+### Cerinta 6
+
+![](cerinta6.png){width=100% fig-align="center"}
+
+### Cerinta 7
+
+![](cerinta7.png){width=100% fig-align="center"}
+
+### Cerinta 8
+
+Lorem ipsum dolor sit amet consectetur adipiscing elit. Quisque faucibus ex sapien vitae pellentesque sem placerat. In id cursus mi pretium tellus duis convallis. Tempus leo eu aenean sed diam urna tempor. Pulvinar vivamus fringilla lacus nec metus bibendum egestas. Iaculis massa nisl malesuada lacinia integer nunc posuere. Ut hendrerit semper vel class aptent taciti sociosqu. Ad litora torquent per conubia nostra inceptos himenaeos.
+
+Lorem ipsum dolor sit amet consectetur adipiscing elit. Quisque faucibus ex sapien vitae pellentesque sem placerat. In id cursus mi pretium tellus duis convallis. Tempus leo eu aenean sed diam urna tempor. Pulvinar vivamus fringilla lacus nec metus bibendum egestas. Iaculis massa nisl malesuada lacinia integer nunc posuere. Ut hendrerit semper vel class aptent taciti sociosqu. Ad litora torquent per conubia nostra inceptos himenaeos.
+
+Lorem ipsum dolor sit amet consectetur adipiscing elit. Quisque faucibus ex sapien vitae pellentesque sem placerat. In id cursus mi pretium tellus duis convallis. Tempus leo eu aenean sed diam urna tempor. Pulvinar vivamus fringilla lacus nec metus bibendum egestas. Iaculis massa nisl malesuada lacinia integer nunc posuere. Ut hendrerit semper vel class aptent taciti sociosqu. Ad litora torquent per conubia nostra inceptos himenaeos.
+
+## Componentă bidimensională obligatorie
+
+### Cerinta 1
+
+![](C1.png){width=100% fig-align="center"}
+
+### Cerinta 2
+
+### Cerinta 3
+
+### Cerinta 4
+
+### Cerinta 5
+
+### Cerinta 6
