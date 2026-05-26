@@ -110,6 +110,44 @@ for(i in 1:nr_zile) {
 # E DOG SHIT
 
 
+### VERIFICARE ADAPTIVA 3.1 ###
+# COSTURI : c_verif <- 1
+#           c_nedetect <- 1000
+# Consideram ca problema este in esenta o problema de optimizare a costurilor / operations research
+
+# Probabilitatea unei cereri sa fie sus ramane constanta in modelul nostru.
+# Vom nota C_v costul unei verificari, iar C_n constul ratarii unei cereri sus.
+# Pentru fiecare cerere verificata, ne asteptam sa salvam p * C_n bani.
+# Problema unei probabilitati constante este urmatoarea:
+# -> Daca p * C_n > C_v, strategia "optima" este sa verifici TOT, adica 100% din cereri
+# -> Daca p * C_n < C_v, strategia "optima" este sa nu verifici NIMIC.
+
+# O strategie dinamica trebuie sa se lege de volumul de trafic zilnic. Cand avem un spike/varf
+#masiv peste lambda = 1000, acel exces nu este doar trafic normal crescut aleator, ci probabilitatea ca
+#excesul sa fie sus creste.
+
+# Vom folosi o functie Sigmoida (Logistica) aplicata pe scorul Z(cate deviatii standard fata
+# de medie are traficul zilnic). Aceasta tine procentul de verificare mic (baseline de 10%) in zile
+# normale, dar va deveni foarte agresiva si va creste spre 80-90% pe spike-uri.
+
+base_proc <- 10 / 100
+max_proc <- 85 / 100 # limita la spike-uri.
+Z_prag <- 1.5 # De la cate deviatii standard (Z-score) incepem sa fim agresivi.
+steepness <- 2 # Cat de brusc crestem agresivitatea.
+
+#Calcul Z-Score: (valoare_zi - Medie) / Deviatie_Standard
+# Pt Poisson, dev_standard = sqrt(lambda)
+deviatie_std <- sqrt(lambda)
+date$Z_score <- (date$total - lambda) / deviatie_std
+
+#Functia sigmoid(intoarce o val intre base_proc si max_proc)
+#Daca Z este mic/negativ, tinde spre base_proc. Daca Z e mare, tinde spre max_proc.
+proc_risk <- base_proc + (max_proc - base_proc) / (1 + exp(-steepness * (date$Z_score - Z_prag)))
+
+date$verificate_a3 <- floor(date$total * proc_risk)
+
+date$verificate_a3 <- pmin(date$verificate_a3, date$total) # evident nu putem verifica mai mult decat exista
+
 # ===========RULAT INDIFERENT DE TIPUL DE VERIFICARE=============
 
 
@@ -141,6 +179,14 @@ date$detectate_a2 <- rhyper(
   k = date$verificate_a2 # actual nr verificate
 )
 date$nedetectate_a2 <- date$sus - date$detectate_a2
+
+date$detectate_a3 <- rhyper(
+  nn <- nr_zile,
+  m = date$sus, # N2
+  n = date$normale, #N1
+  k = date$verificate_a3 # actual nr verificate
+)
+date$nedetectate_a3 <- date$sus - date$detectate_a3
 
 # Cerinta 5. Pt. fiecare strategie se calculeaza
 # a)        - probabilitate empirica de a detecta cel putin o cerere sus/per zi
@@ -207,6 +253,7 @@ plot(date$zi, cumsum(date$sus), type = "l", col = "red", lwd = 2,
 lines(date$zi, cumsum(date$detectate_s), col = "lightblue", lwd = 2)
 lines(date$zi, cumsum(date$detectate_a), col = "blue", lwd = 2)
 lines(date$zi, cumsum(date$detectate_a2), col = "darkblue", lwd = 2)
+lines(date$zi, cumsum(date$detectate_a3), col = "darkred", lwd = 2 )
 legend("topright", legend = c("Cereri Suspecte", "Cereri Detectate Simplu","Cereri Detectate Adaptiv","Cereri Detectate Adaptiv propus"), col = c("red", "lightblue","blue","darkblue"), lwd = 2)
 
 # d)        - Evolutia zilnica a nr de cereri sus si cereri detectate
@@ -218,7 +265,7 @@ plot(date$zi, date$sus, type = "l", col = "red", lwd = 2,
      ylab = "Nr. cereri",
      ylim = c(0, max(date$sus))
      )
-lines(date$zi, date$detectate_a, col = "blue", lwd = 2)
+lines(date$zi, date$detectate_a3, col = "blue", lwd = 2)
 legend("topright", legend = c("Cereri Sus", "Cereri Detectate"), col = c("red", "blue"), lwd = 2)
 
 #plot evolutie cereri
@@ -295,6 +342,9 @@ mean(CF_a)
 
 CF_a2 <- c_verif * date$verificate_a2 + c_nedetect * date$nedetectate_a2
 mean(CF_a2)
+
+CF_a3 <- c_verif * date$verificate_a3 + c_nedetect * date$nedetectate_a3
+mean(CF_a3)
 
 # 2
 
