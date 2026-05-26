@@ -146,7 +146,7 @@ ui <- fluidPage(
   # Pseudo footer for credits
   tags$div(
     style = "text-align: center; margin-top: 20px; padding-top: 20px; border-top: 1px solid #444; margin-bottom: 20px;",
-    h5(
+    h4(
       "Credite:",
       style = "
         margin-bottom: 15px;
