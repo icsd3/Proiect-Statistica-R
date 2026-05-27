@@ -1,10 +1,10 @@
 ---
 title: "\\Huge Studiu prin simulare în R"
 author: 
+  - '\textbf{\underline{Popa Mircea}}'
   - "Sîrghe Matei-Ștefan"
-  - "Popa Mircea"
   - "Bujor Ștefan"
-  - "Afton Ungureanu Robert"
+  - "Ungureanu Robert Anton"
 date: last-modified
 date-format: "DD MMMM YYYY"
 format: pdf
@@ -156,7 +156,7 @@ prob_empiric <- sum(vector_logic) / length(vector_logic)
 
 #mean(date$detectate / date$total)
 mean(date$detectate_s / date$sus)
-# in proportie detectezi din 10 suspicioase doar una.
+# in proportie detectezi din 10 suspecte doar una.
 
 # c)
 mean(date$nedetectate_s / date$sus)
@@ -279,7 +279,7 @@ plot(x, y_1000, type = "b", col = "darkblue", pch = 16, lwd = 2,
 
 # Documentatie Problema 1
 
-In aceasta documentatie vom explica cum am rezolvat cerintele si deciziile luate cand vine vorba de rezolvarea acestora
+In aceasta documentatie vom explica rezolvarea cerintelor date si deciziile luate in privinta rezolvarii acestora.
 
 ## Cerinta obligatorie
 
@@ -309,11 +309,11 @@ date <- data.frame(
 
 ### Cerinta 2
 
-Putem considera ca numarul total de accesuri per zi urmaresc repartitia Poisson, deoarece modelul nostru matematic se bazeaza pe evenimente independente ce se intampla si sunt numarabile intr-un interval fix, avand adesea o rata medie de aparitie pe care o stim aproximativ constanta. Puteam alege si alte repartii deoarece nu avem detalii despre cereri, cat timp ne asiguram ca acestea sunt marginite.
+Putem considera ca numarul total de accesări per zi urmaresc repartitia Poisson, deoarece modelul nostru matematic se bazeaza pe evenimente independente ce se intampla si sunt numarabile intr-un interval fix, avand adesea o rata medie de aparitie pe care o stim aproximativ constanta. Puteam alege si alte repartii deoarece nu avem detalii despre cereri, cat timp ne asiguram ca acestea sunt marginite.
 
-Am ales lambda un numar care sa fie mai mare astfel incat simularile sa fie mai apropiate de o situație mai realistică (i.e. 1000 de accesări în mediu per zi al resursei online).
+Am ales lambda un numar care sa fie mai mare astfel incat simularile sa fie mai apropiate de o situație mai realistă (i.e. 1000 de accesări în medie per zi ale resursei online).
 
-Numarul de zile ales este aleator, dar din nou dorim un numar mai mare pentru a avea mai multe date deci vom alege un an.
+Numarul de zile este dat (un an calendaristic).
 
 ```{r}
 
@@ -326,7 +326,7 @@ head(total)
 
 ### Cerinta 3
 
-Vom avea 3 probabilitati definite
+Vom avea 3 probabilitati definite.
 
 ```{r}
 #| eval: false
@@ -340,7 +340,7 @@ p3      <- 0.2
 
 #### a) Verificare aleatoare simpla
 
-Pentru testarea și aplicarea celor trei metode de verificare, am ales sa folosim repartizarea hypergeometrica deoarece definitia ei se portriveste pentru situatia noastra unde avem n cereri verificate din N cereri totale, stiind ca k dintre acestea sunt suspecte.
+Pentru testarea și aplicarea celor trei metode de verificare, am ales sa folosim repartizarea hypergeometrica deoarece definitia ei se portriveste situatiei noastra unde avem n cereri verificate din N cereri totale, stiind ca un numar k dintre acestea sunt suspecte.
 
 ```{r}
 proc_verificare <- 10 / 100 #PARAMETRIZABIL
@@ -360,7 +360,7 @@ head(date$nedetectate_s)
 
 #### b) Verificare adaptiva 1
 
-Crestem procentul odata ce vedem ca numarul de cereri din acea zi este mai mare decat media lambda
+Crestem procentul odata ce vedem ca numarul de cereri din acea zi este mai mare decat media lambda.
 
 ```{r}
 proc_adapt <- 20 / 100 + abs(date$total - lambda) * 80/100
@@ -548,7 +548,7 @@ lines(date$zi, cumsum(date$detectate_a3), col = "cornflowerblue", lwd = 2)
 
 - Evoluția zilnică a cererilor suspecte și a celor detectate
 
-Am facut un plot pentru zile impartit la numarul decereri:
+Am facut un plot pentru zile impartit la numarul de cereri:
 
 ```{r}
 #| echo: true
@@ -644,11 +644,11 @@ plot(x, y_100, type = "b", col = "darkblue", pch = 16, lwd = 2,
 
 ```
 
-Se observa cum prin incercare aleatorie procentul de cereri suspicioase detectate creste linear cu procentul de date verificate dintre cele totale, deci probabilitatea de detectie se schimba linear.
+Se observa cum prin incercare aleatoare procentul de cereri suspecte detectate creste proportional cu procentul de date verificate dintre cele totale, deci probabilitatea de detectie se schimba liniar.
 
 ### Cerinta 8
 
-In concluzie, se observa cum abordarea simpla aleatorie nu este destul pentru a detecta majoritatea cererilor suspicioase iar o abordare dinamica este necesara pentru a gasi mai multe cereri suspicioase in zilele cu mai multe cereri in general, iar pentru zilele cu mai putine cereri nu avem de ce sa cautam atat de multe cereri suspicioase doarece nu sunt atat de mult de gasit. Strategia simpla este buna in sensul ca gaseste consistent un numar de cereri suspicioase pe zi raportat la numarul de cereri totale dar daca vrem sa maximizam numarul de cereri suspicioase gasite in raport cu numarul de incercari, atunci abordarea simpla pica. Abordarile dinamice au dus la reducerea costului implicat in verificari deoarece fiecare strategie a incercat sa reactioneze la schimbari fie in raport de medie si depasari ale acesteia fie prin adaptari la spike-uri de cereri suspicioase, strategia optima fiind ceea care a utilizat functia sigmoida, care a reusit sa creasca exponential numarul de verificari necesare pe zi in functie de numarul de cereri suspicioase.
+In concluzie, se observa cum abordarea simpla aleatoare nu este suficienta pentru a detecta majoritatea cererilor suspecte, iar o abordare dinamica este necesara pentru a gasi mai multe dintre acestea in zilele cu mai multe cereri in general, iar pentru zilele cu un total mai mic nu avem de ce sa cautam atat de multe cereri suspecte, doarece nu sunt atat de multe de gasit. Strategia simpla este buna in sensul ca gaseste consistent un numar de cereri suspecte pe zi raportat la numarul de cereri totale, dar daca vrem sa maximizam numarul gasit in raport cu numarul de incercari, atunci abordarea simpla pica. Abordarile dinamice au dus la reducerea costului implicat in verificari, deoarece fiecare strategie a incercat sa reactioneze la schimbari fie in raport de medie si deplasari ale acesteia fie prin adaptari la spike-uri de cereri suspecte, strategia optima fiind ceea care a utilizat functia sigmoida, care a reusit sa creasca exponential numarul de verificari necesare pe zi in functie de numarul de cereri suspecte.
 
 ## Cerinta ulterioara
 
@@ -718,7 +718,7 @@ sd(costuri_a3)
 
 ### Cerinta 3
 
-Probabilitatiile teoretice sunt valorile exacte obtinute prin demonstratie matematica, folosind teoreme si functii de masa sau densitate de probabilitate. Probabilitatiile simulate sunt valori aproximative obtinute prin simularea unui model de un numar mare de ori si extragerea unori statistici cum ar fi media sau deviata standard din setul de date.
+Probabilitatile teoretice sunt valorile exacte obtinute prin demonstratie matematica, folosind teoreme si functii de masa sau densitate de probabilitate. Probabilitatiile simulate sunt valori aproximative obtinute prin simularea unui model de un numar mare de ori si extragerea unori statistici cum ar fi media sau deviatia standard din setul de date.
 
 # Documentatie Problema 2
 
@@ -765,7 +765,7 @@ Repartitia gamma: ![](cerinta24.png){width="50%" fig-align="center"}
 ![](cerinta7.png){width="100%" fig-align="center"}
 
 Pentru a detecta cum a modificat transformarea simetria, vom rezolva cerinta folosind Coeficientul lui Pearson de asimetrie.
-Mai intai calculam coeficientul utilizand formula a doua a lui Pearson care se foloseste de mediana:
+Mai intai calculam coeficientul utilizand formula a doua a lui Pearson care utilizeaza mediana:
 $Sk_{2} = \frac{3(\bar{X}-M_{d})}{s}$
 
 ```{r}
@@ -776,13 +776,13 @@ $Sk_{2} = \frac{3(\bar{X}-M_{d})}{s}$
   }
 ```
 
-Folosind aceasta asimetrie, o putem compara cu o valoare aproape de 0, in cazul nostru aceasta fiind 0,2. Daca e mai mare atunci este asimetria pozitiv,daca e mai mica ca -0,2 aunci este asimetrica negativ, altfel zicem ca aceasta este simetrica. Ca sa vedem daca transformarea a afectat simetria,verificam daca daca avem acelasi raspuns pentru X si Y si putem da un raspuns.
+Folosind aceasta asimetrie, o putem compara cu o valoare aproape de 0, in cazul nostru aceasta fiind 0,2. Daca e mai mare atunci este asimetrica pozitiv, iar daca e mai mica ca -0,2 aunci este asimetrica negativ, altfel zicem ca aceasta este simetrica. Pentru a vedea daca transformarea a afectat simetria, verificam daca avem acelasi raspuns pentru X si Y si putem da un raspuns.
 
 Ca sa verificam daca transformarea a comprimat valorile mari, vom verifica maximul din X cu maximul din Y.
 
 Ca sa verificam daca transformarea a produs doar valori strict pozitive, doar comparam fiecare valoare cu 0.
 
-Pentru a vedea accentuarea valorilor extreme, ne vom folosi de formulele de baza ale boxplotului.Mai intai calculam iqr pentru X si Y. Dupa calculam numarul de elemente ale lui X care apartin in intervalul $(q_{1} - 1.5 * iqr,q_{3} + 1.5 * iqr)$ si comparam cu numarul de elemente din Y cu aceasi conditie doar ca utilizam quartilele de la Y. Cand numarul de elemente din X e mai mare decat numarul de elemente din Y cu aceasta proprietate, avem o diminiuare a valorilor extreme, altfel avem o accentuare.
+Pentru a vedea accentuarea valorilor extreme, ne vom folosi de formulele de baza ale boxplotului. Mai intai calculam iqr pentru X si Y. Dupa calculam numarul de elemente ale lui X care apartin intervalului $(q_{1} - 1.5 * iqr,q_{3} + 1.5 * iqr)$ si comparam cu numarul de elemente din Y cu aceeasi conditie doar ca utilizam quartilele de la Y. Cand numarul de elemente din X e mai mare decat numarul de elemente din Y cu aceasta proprietate, avem o diminuare a valorilor extreme, altfel avem o accentuare.
 
 ### Cerinta 8
 
@@ -790,7 +790,7 @@ Vom considera $X \sim N(0, 1)$ si transformarile $Y = \log{X} \text{ si } Y = e^
 .
 
 
-Transformarea $Y = e^X$ transforma valorile negative ale lui X in valori subunitare ($0 < e^X < 1$), cele pozitive dau valori supraunitare. In acest caz, Y va fi mereu pozitiva, asimetrica spre dreapta. Valorile mari sunt rare dar pot fi foarte mari.
+Transformarea $Y = e^X$ transforma valorile negative ale lui X in valori subunitare ($0 < e^X < 1$) si pe cele pozitive in valori supraunitare. In acest caz, Y va fi mereu pozitiva, asimetrica spre dreapta. Valorile mari sunt rare dar pot fi foarte mari.
 
 Transformarea $Y = log(X)$ este problematica deoarece log(x) nu este definita pentru valori mai mici sau egale cu 0. Deoarece X ia valori negative cu o probabilitate de 50%, aceasta transformare este invalida pe jumatate din domeniu. Aplicatia noastra elimina in acest caz valorile care sunt fie NaN, fie infinite.
 
@@ -820,16 +820,16 @@ Transformarea $Y = log(X)$ este problematica deoarece log(x) nu este definita pe
 
 ### Cerinta 6
 
-Parametrul de corelatie are un efect direct, liniar si proportional asupra covariantei. Avand abateriile standard $\sigma_X$ si $\sigma_Y$ constante, influenta lui $\rho$ este urmatoarea:
+Parametrul de corelatie are un efect direct, liniar si proportional asupra covariantei. Avand abaterile standard $\sigma_X$ si $\sigma_Y$ constante, influenta lui $\rho$ este urmatoarea:
 
 - Daca $\rho = 0$ covarianta tinde spre 0, indiferent de marimea abaterilor standard. Cele doua variabile nu prezinta o tendinta liniara de a creste sau descreste impreuna. Norul de puncte este circular sau o elipsa usoara.
 
 ![](Cerinta26p0.png){width="100%" fig-align="center"}
 
-- Daca $\rho = 0.5$ covarianta devine pozitiva. Cresterea parametrului mareste direct proportional covarianta. Norul de puncte ia o forma elipsoida spre dreapta-sus, indicand ca valorile mari ale lui X tind sa fie asociate cu valori mari ale lui Y.
+- Daca $\rho = 0.5$ covarianta devine pozitiva. Cresterea parametrului mareste direct proportional covarianta. Norul de puncte ia o forma elipsoida spre dreapta-sus, indicand faptul ca valorile mari ale lui X tind sa fie asociate cu valori mari ale lui Y.
 
 ![](Cerinta26p05.png){width="100%" fig-align="center"}
 
-- Daca $\rho = -0.5$ covarianta devine negativa. Pe masura ce parametrul se aproprie de -1, covarianta scade. Norul de puncte ia o forma elipsoida si se inclina spre dreapta-jos, indicand ca valorile mari ale lui X sunt asociate cu valori mici ale lui Y.
+- Daca $\rho = -0.5$ covarianta devine negativa. Pe masura ce parametrul se aproprie de -1, covarianta scade. Norul de puncte ia o forma elipsoida si se inclina spre dreapta-jos, indicand faptul ca valorile mari ale lui X sunt asociate cu valori mici ale lui Y.
 
 ![](Cerinta26pn05.png){width="100%" fig-align="center"}
